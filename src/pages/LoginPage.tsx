@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { login } from "../api/auth.api";
+import { setAccessToken, setStoredUser } from "../utils/auth";
 
 const loginSchema = z.object({
   email: z.email("Veuillez saisir un email valide."),
@@ -40,8 +41,8 @@ export function LoginPage() {
 
       const result = await login(data);
 
-      localStorage.setItem("accessToken", result.accessToken);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      setAccessToken(result.accessToken);
+      setStoredUser(result.user);
 
       if (result.user.role !== "ADMIN") {
         setApiError(
