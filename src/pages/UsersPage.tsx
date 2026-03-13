@@ -3,7 +3,9 @@ import { getUsers } from "../api/users.api";
 import type { User } from "../types/user";
 
 export function UsersPage() {
-const [users, setUsers] = useState<User[]>([]);  const [loading, setLoading] = useState(true);
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadUsers() {
@@ -21,7 +23,7 @@ const [users, setUsers] = useState<User[]>([]);  const [loading, setLoading] = u
   }, []);
 
   if (loading) {
-    return <div>Chargement...</div>;
+    return <p>Chargement...</p>;
   }
 
   return (
@@ -30,9 +32,9 @@ const [users, setUsers] = useState<User[]>([]);  const [loading, setLoading] = u
 
       <ul>
         {users.map((user) => (
-          <li key={user.id}>
-            {user.email} — {user.role}
-          </li>
+        <li key={user.id}>
+          {user.email} — {user.role} — {user.isActive ? "Actif" : "Inactif"}
+        </li>
         ))}
       </ul>
     </div>
