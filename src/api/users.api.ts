@@ -11,12 +11,12 @@ type CreateUserPayload = {
 };
 
 type UpdateUserPayload = {
-  firstName: string;
-  lastName: string;
-  pseudo: string;
-  email: string;
-  role: "USER" | "ADMIN";
-  isActive: boolean;
+  firstName?: string;
+  lastName?: string;
+  pseudo?: string;
+  email?: string;
+  role?: "USER" | "ADMIN";
+  isActive?: boolean;
 };
 
 // Récupère la liste des utilisateurs depuis l’API.

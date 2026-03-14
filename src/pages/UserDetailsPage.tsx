@@ -3,8 +3,17 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getUserById, updateUser } from "../api/users.api";
 import type { User } from "../types/user";
 import "./UserDetailsPage.css";
+import axios from "axios";
 
 type EditableRole = "USER" | "ADMIN";
+
+type ApiValidationError = {
+  error?: string;
+  details?: Array<{
+    path?: (string | number)[];
+    message?: string;
+  }>;
+};
 
 export function UserDetailsPage() {
   const { id } = useParams();
@@ -67,19 +76,59 @@ export function UserDetailsPage() {
       setErrorMessage("");
       setSuccessMessage("");
 
-      const updatedUser = await updateUser(id, {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        pseudo: pseudo.trim(),
+      const payload = {
         email: email.trim(),
+        pseudo: pseudo.trim(),
+        firstName: firstName.trim() || undefined,
+        lastName: lastName.trim() || undefined,
         role,
         isActive,
-      });
+      };
+
+      const updatedUser = await updateUser(id, payload);
 
       setUser(updatedUser);
+      setFirstName(updatedUser.firstName ?? "");
+      setLastName(updatedUser.lastName ?? "");
+      setPseudo(updatedUser.pseudo ?? "");
+      setEmail(updatedUser.email ?? "");
+      setRole(updatedUser.role);
+      setIsActive(updatedUser.isActive);
+
       setSuccessMessage("Utilisateur mis à jour avec succès.");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
+
+      if (axios.isAxiosError<ApiValidationError>(error)) {
+        const apiMessage = error.response?.data?.error;
+        const validationDetails = error.response?.data?.details;
+
+        if (apiMessage === "EMAIL_ALREADY_USED") {
+          setErrorMessage("Cette adresse email est déjà utilisée.");
+          return;
+        }
+
+        if (apiMessage === "PSEUDO_ALREADY_USED") {
+          setErrorMessage("Ce pseudo est déjà utilisé.");
+          return;
+        }
+
+        if (apiMessage === "USER_NOT_FOUND") {
+          setErrorMessage("Utilisateur introuvable.");
+          return;
+        }
+
+        if (apiMessage === "VALIDATION_ERROR" && validationDetails?.length) {
+          setErrorMessage(validationDetails[0].message ?? "Données invalides.");
+          return;
+        }
+
+        if (apiMessage) {
+          setErrorMessage(apiMessage);
+          return;
+        }
+      }
+
       setErrorMessage("Impossible de mettre à jour l'utilisateur.");
     } finally {
       setIsSaving(false);
