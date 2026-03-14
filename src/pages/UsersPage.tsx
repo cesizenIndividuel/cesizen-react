@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { getUsers, updateUserStatus } from "../api/users.api";
 import type { User } from "../types/user";
 
+type SortField = "name" | "email" | "role" | "status";
+type SortDirection = "asc" | "desc";
+
 function getRoleLabel(role: User["role"]) {
   return role === "ADMIN" ? "Administrateur" : "Utilisateur";
 }
@@ -16,11 +19,25 @@ function getFullName(user: User) {
   return user.pseudo;
 }
 
+function getSortIndicator(
+  currentField: SortField,
+  activeField: SortField,
+  direction: SortDirection
+) {
+  if (currentField !== activeField) {
+    return " ↕";
+  }
+
+  return direction === "asc" ? " ↑" : " ↓";
+}
+
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   async function handleToggleUser(user: User) {
     try {
@@ -35,6 +52,18 @@ export function UsersPage() {
       console.error(error);
       alert("Impossible de modifier le statut.");
     }
+  }
+
+  function handleSort(field: SortField) {
+    if (sortField === field) {
+      setSortDirection((previousDirection) =>
+        previousDirection === "asc" ? "desc" : "asc"
+      );
+      return;
+    }
+
+    setSortField(field);
+    setSortDirection("asc");
   }
 
   useEffect(() => {
@@ -57,11 +86,11 @@ export function UsersPage() {
   const filteredUsers = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      return users;
-    }
+    const result = users.filter((user) => {
+      if (!normalizedSearch) {
+        return true;
+      }
 
-    return users.filter((user) => {
       const fullName = getFullName(user).toLowerCase();
       const email = user.email.toLowerCase();
       const pseudo = user.pseudo.toLowerCase();
@@ -72,7 +101,46 @@ export function UsersPage() {
         pseudo.includes(normalizedSearch)
       );
     });
-  }, [users, search]);
+
+    result.sort((a, b) => {
+      let valueA = "";
+      let valueB = "";
+
+      switch (sortField) {
+        case "name":
+          valueA = getFullName(a).toLowerCase();
+          valueB = getFullName(b).toLowerCase();
+          break;
+
+        case "email":
+          valueA = a.email.toLowerCase();
+          valueB = b.email.toLowerCase();
+          break;
+
+        case "role":
+          valueA = getRoleLabel(a.role).toLowerCase();
+          valueB = getRoleLabel(b.role).toLowerCase();
+          break;
+
+        case "status":
+          valueA = a.isActive ? "actif" : "désactivé";
+          valueB = b.isActive ? "actif" : "désactivé";
+          break;
+      }
+
+      if (valueA < valueB) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+
+      if (valueA > valueB) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
+
+      return 0;
+    });
+
+    return result;
+  }, [users, search, sortField, sortDirection]);
 
   if (loading) {
     return <p>Chargement des utilisateurs...</p>;
@@ -144,45 +212,61 @@ export function UsersPage() {
             <thead>
               <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
                 <th
+                  onClick={() => handleSort("name")}
                   style={{
                     textAlign: "left",
                     padding: "14px 8px",
                     color: "#4b5563",
                     fontSize: "14px",
+                    cursor: "pointer",
+                    userSelect: "none",
                   }}
                 >
-                  Nom
+                  Nom{getSortIndicator("name", sortField, sortDirection)}
                 </th>
+
                 <th
+                  onClick={() => handleSort("email")}
                   style={{
                     textAlign: "left",
                     padding: "14px 8px",
                     color: "#4b5563",
                     fontSize: "14px",
+                    cursor: "pointer",
+                    userSelect: "none",
                   }}
                 >
-                  Email
+                  Email{getSortIndicator("email", sortField, sortDirection)}
                 </th>
+
                 <th
+                  onClick={() => handleSort("role")}
                   style={{
                     textAlign: "left",
                     padding: "14px 8px",
                     color: "#4b5563",
                     fontSize: "14px",
+                    cursor: "pointer",
+                    userSelect: "none",
                   }}
                 >
-                  Rôle
+                  Rôle{getSortIndicator("role", sortField, sortDirection)}
                 </th>
+
                 <th
+                  onClick={() => handleSort("status")}
                   style={{
                     textAlign: "left",
                     padding: "14px 8px",
                     color: "#4b5563",
                     fontSize: "14px",
+                    cursor: "pointer",
+                    userSelect: "none",
                   }}
                 >
-                  Statut
+                  Statut{getSortIndicator("status", sortField, sortDirection)}
                 </th>
+
                 <th
                   style={{
                     textAlign: "left",
@@ -235,7 +319,7 @@ export function UsersPage() {
                         borderRadius: "999px",
                         backgroundColor:
                           user.role === "ADMIN" ? "#5A8B7A" : "#E8F0EC",
-                        color: user.role === "ADMIN" ? "#FFFF" : "#303A3C",
+                        color: user.role === "ADMIN" ? "#FFFFFF" : "#303A3C",
                         fontSize: "13px",
                         fontWeight: 600,
                       }}
@@ -258,15 +342,30 @@ export function UsersPage() {
                     >
                       <button
                         type="button"
-                        onClick={() => handleToggleUser(user)}
+                        disabled={user.role === "ADMIN"}
+                        onClick={() => {
+                          if (user.role !== "ADMIN") {
+                            handleToggleUser(user);
+                          }
+                        }}
+                        title={
+                          user.role === "ADMIN"
+                            ? "Un administrateur ne peut pas être désactivé"
+                            : ""
+                        }
                         style={{
                           position: "relative",
                           width: "44px",
                           height: "24px",
                           border: "none",
                           borderRadius: "999px",
-                          backgroundColor: user.isActive ? "#5A8B7A" : "#D1D5DB",
-                          cursor: "pointer",
+                          backgroundColor:
+                            user.role === "ADMIN"
+                              ? "#E5E7EB"
+                              : user.isActive
+                              ? "#5A8B7A"
+                              : "#D1D5DB",
+                          cursor: user.role === "ADMIN" ? "not-allowed" : "pointer",
                           transition: "0.2s",
                           padding: 0,
                         }}
@@ -287,7 +386,12 @@ export function UsersPage() {
 
                       <span
                         style={{
-                          color: user.isActive ? "#059669" : "#6b7280",
+                          color:
+                            user.role === "ADMIN"
+                              ? "#9CA3AF"
+                              : user.isActive
+                              ? "#059669"
+                              : "#6b7280",
                           fontWeight: 500,
                         }}
                       >
