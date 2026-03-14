@@ -200,3 +200,47 @@
 .users-page__error {
   color: crimson;
 }
+
+.users-page__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.users-page__pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.users-page__pagination-button,
+.users-page__pagination-number {
+  border: 1px solid #d7e3dd;
+  background-color: #ffffff;
+  color: #355447;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.users-page__pagination-button:hover,
+.users-page__pagination-number:hover {
+  background-color: #edf5f0;
+}
+
+.users-page__pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.users-page__pagination-number--active {
+  background-color: #5a8b7a;
+  color: #ffffff;
+  border-color: #5a8b7a;
+}

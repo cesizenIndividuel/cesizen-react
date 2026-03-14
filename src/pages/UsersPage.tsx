@@ -34,6 +34,7 @@ function getSortIndicator(
 
 function getUserAvatarSrc(user: User) {
   const API_URL = import.meta.env.VITE_API_URL;
+
   if (user.avatarUrl) {
     if (user.avatarUrl.startsWith("http")) {
       return user.avatarUrl;
@@ -45,8 +46,7 @@ function getUserAvatarSrc(user: User) {
   return user.role === "ADMIN" ? "/avatar-admin.png" : "/avatar-user.png";
 }
 
-//------------------------------------------------------------//
-
+//---------------------------------------------------------------------------//
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,13 +55,14 @@ export function UsersPage() {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [hoveredUserId, setHoveredUserId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  //Activation et désactivation utilisateur 
+  const USERS_PER_PAGE = 10;
+
   async function handleToggleUser(user: User) {
     try {
       const updatedUser = await updateUserStatus(user.id, !user.isActive);
 
-      //Maj du user concerné
       setUsers((previousUsers) =>
         previousUsers.map((u) =>
           u.id === user.id ? { ...u, isActive: updatedUser.isActive } : u
@@ -73,7 +74,6 @@ export function UsersPage() {
     }
   }
 
-  //Gestion du tri
   function handleSort(field: SortField) {
     if (sortField === field) {
       setSortDirection((previousDirection) =>
@@ -106,7 +106,6 @@ export function UsersPage() {
   const filteredUsers = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    //filtre
     const result = users.filter((user) => {
       if (!normalizedSearch) {
         return true;
@@ -123,7 +122,6 @@ export function UsersPage() {
       );
     });
 
-    //tri
     result.sort((a, b) => {
       let valueA = "";
       let valueB = "";
@@ -164,6 +162,31 @@ export function UsersPage() {
     return result;
   }, [users, search, sortField, sortDirection]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortField, sortDirection]);
+
+  const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
+
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * USERS_PER_PAGE;
+    const endIndex = startIndex + USERS_PER_PAGE;
+
+    return filteredUsers.slice(startIndex, endIndex);
+  }, [filteredUsers, currentPage]);
+
+  function goToPreviousPage() {
+    setCurrentPage((previousPage) => Math.max(previousPage - 1, 1));
+  }
+
+  function goToNextPage() {
+    setCurrentPage((previousPage) => Math.min(previousPage + 1, totalPages));
+  }
+
+  function goToPage(page: number) {
+    setCurrentPage(page);
+  }
+
   if (loading) {
     return <p>Chargement des utilisateurs...</p>;
   }
@@ -190,138 +213,181 @@ export function UsersPage() {
         {filteredUsers.length === 0 ? (
           <p className="users-page__empty">Aucun utilisateur à afficher.</p>
         ) : (
-          <table className="users-page__table">
-            <thead>
-              <tr className="users-page__head-row">
-                <th
-                  onClick={() => handleSort("name")}
-                  className="users-page__sortable"
-                >
-                  Nom{getSortIndicator("name", sortField, sortDirection)}
-                </th>
+          <>
+            <table className="users-page__table">
+              <thead>
+                <tr className="users-page__head-row">
+                  <th
+                    onClick={() => handleSort("name")}
+                    className="users-page__sortable"
+                  >
+                    Nom{getSortIndicator("name", sortField, sortDirection)}
+                  </th>
 
-                <th
-                  onClick={() => handleSort("email")}
-                  className="users-page__sortable"
-                >
-                  Email{getSortIndicator("email", sortField, sortDirection)}
-                </th>
+                  <th
+                    onClick={() => handleSort("email")}
+                    className="users-page__sortable"
+                  >
+                    Email{getSortIndicator("email", sortField, sortDirection)}
+                  </th>
 
-                <th
-                  onClick={() => handleSort("role")}
-                  className="users-page__sortable"
-                >
-                  Rôle{getSortIndicator("role", sortField, sortDirection)}
-                </th>
+                  <th
+                    onClick={() => handleSort("role")}
+                    className="users-page__sortable"
+                  >
+                    Rôle{getSortIndicator("role", sortField, sortDirection)}
+                  </th>
 
-                <th
-                  onClick={() => handleSort("status")}
-                  className="users-page__sortable"
-                >
-                  Statut{getSortIndicator("status", sortField, sortDirection)}
-                </th>
+                  <th
+                    onClick={() => handleSort("status")}
+                    className="users-page__sortable"
+                  >
+                    Statut{getSortIndicator("status", sortField, sortDirection)}
+                  </th>
 
-                <th className="users-page__actions-header">Actions</th>
-              </tr>
-            </thead>
+                  <th className="users-page__actions-header">Actions</th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  onMouseEnter={() => setHoveredUserId(user.id)}
-                  onMouseLeave={() => setHoveredUserId(null)}
-                  className={`users-page__row ${
-                    hoveredUserId === user.id ? "users-page__row--hovered" : ""
-                  }`}
-                >
-                  <td className="users-page__cell">
-                    <div className="users-page__name-cell">
-                      <img
-                        src={getUserAvatarSrc(user)}
-                        alt={getFullName(user)}
-                        className={`users-page__avatar ${
-                          user.role === "ADMIN"
-                            ? "users-page__avatar--admin"
-                            : ""
-                        }`}
-                      />
-
-                      <span className="users-page__name">
-                        {getFullName(user)}
-                      </span>
-                    </div>
-                  </td>
-
-                  <td className="users-page__cell">{user.email}</td>
-
-                  <td className="users-page__cell">
-                    <span
-                      className={`users-page__badge ${
-                        user.role === "ADMIN"
-                          ? "users-page__badge--admin"
-                          : "users-page__badge--user"
-                      }`}
-                    >
-                      {getRoleLabel(user.role)}
-                    </span>
-                  </td>
-
-                  <td className="users-page__cell">
-                    <div className="users-page__status-cell">
-                      <button
-                        type="button"
-                        disabled={user.role === "ADMIN"}
-                        onClick={() => {
-                          if (user.role !== "ADMIN") {
-                            handleToggleUser(user);
-                          }
-                        }}
-                        title={
-                          user.role === "ADMIN"
-                            ? "Un administrateur ne peut pas être désactivé"
-                            : ""
-                        }
-                        className={`users-page__toggle ${
-                          user.role === "ADMIN"
-                            ? "users-page__toggle--disabled"
-                            : user.isActive
-                            ? "users-page__toggle--active"
-                            : "users-page__toggle--inactive"
-                        }`}
-                      >
-                        <span
-                          className={`users-page__toggle-thumb ${
-                            user.isActive
-                              ? "users-page__toggle-thumb--active"
-                              : "users-page__toggle-thumb--inactive"
+              <tbody>
+                {paginatedUsers.map((user) => (
+                  <tr
+                    key={user.id}
+                    onMouseEnter={() => setHoveredUserId(user.id)}
+                    onMouseLeave={() => setHoveredUserId(null)}
+                    className={`users-page__row ${
+                      hoveredUserId === user.id ? "users-page__row--hovered" : ""
+                    }`}
+                  >
+                    <td className="users-page__cell">
+                      <div className="users-page__name-cell">
+                        <img
+                          src={getUserAvatarSrc(user)}
+                          alt={getFullName(user)}
+                          className={`users-page__avatar ${
+                            user.role === "ADMIN"
+                              ? "users-page__avatar--admin"
+                              : ""
                           }`}
                         />
-                      </button>
 
+                        <span className="users-page__name">
+                          {getFullName(user)}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="users-page__cell">{user.email}</td>
+
+                    <td className="users-page__cell">
                       <span
-                        className={`users-page__status-text ${
+                        className={`users-page__badge ${
                           user.role === "ADMIN"
-                            ? "users-page__status-text--admin"
-                            : user.isActive
-                            ? "users-page__status-text--active"
-                            : "users-page__status-text--inactive"
+                            ? "users-page__badge--admin"
+                            : "users-page__badge--user"
                         }`}
                       >
-                        {user.isActive ? "Actif" : "Désactivé"}
+                        {getRoleLabel(user.role)}
                       </span>
-                    </div>
-                  </td>
+                    </td>
 
-                  <td className="users-page__cell">
-                    <button type="button" className="users-page__edit-button">
-                      Modifier
+                    <td className="users-page__cell">
+                      <div className="users-page__status-cell">
+                        <button
+                          type="button"
+                          disabled={user.role === "ADMIN"}
+                          onClick={() => {
+                            if (user.role !== "ADMIN") {
+                              handleToggleUser(user);
+                            }
+                          }}
+                          title={
+                            user.role === "ADMIN"
+                              ? "Un administrateur ne peut pas être désactivé"
+                              : ""
+                          }
+                          className={`users-page__toggle ${
+                            user.role === "ADMIN"
+                              ? "users-page__toggle--disabled"
+                              : user.isActive
+                              ? "users-page__toggle--active"
+                              : "users-page__toggle--inactive"
+                          }`}
+                        >
+                          <span
+                            className={`users-page__toggle-thumb ${
+                              user.isActive
+                                ? "users-page__toggle-thumb--active"
+                                : "users-page__toggle-thumb--inactive"
+                            }`}
+                          />
+                        </button>
+
+                        <span
+                          className={`users-page__status-text ${
+                            user.role === "ADMIN"
+                              ? "users-page__status-text--admin"
+                              : user.isActive
+                              ? "users-page__status-text--active"
+                              : "users-page__status-text--inactive"
+                          }`}
+                        >
+                          {user.isActive ? "Actif" : "Désactivé"}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="users-page__cell">
+                      <button type="button" className="users-page__edit-button">
+                        Modifier
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="users-page__pagination">
+              <button
+                type="button"
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="users-page__pagination-button"
+              >
+                Précédent
+              </button>
+
+              <div className="users-page__pagination-pages">
+                {Array.from({ length: totalPages }, (_, index) => {
+                  const page = index + 1;
+
+                  return (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => goToPage(page)}
+                      className={`users-page__pagination-number ${
+                        currentPage === page
+                          ? "users-page__pagination-number--active"
+                          : ""
+                      }`}
+                    >
+                      {page}
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="users-page__pagination-button"
+              >
+                Suivant
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
