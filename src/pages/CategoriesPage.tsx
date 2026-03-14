@@ -53,9 +53,7 @@ export function CategoriesPage() {
   }, []);
 
   const sortedCategories = useMemo(() => {
-    return [...categories].sort((a, b) =>
-      a.name.localeCompare(b.name, "fr")
-    );
+    return [...categories].sort((a, b) => a.name.localeCompare(b.name, "fr"));
   }, [categories]);
 
   async function handleCreateCategory(event: React.FormEvent<HTMLFormElement>) {
@@ -64,6 +62,7 @@ export function CategoriesPage() {
     try {
       setCreateErrorMessage("");
       setCreateSuccessMessage("");
+      setEditSuccessMessage("");
       setIsCreating(true);
 
       const createdCategory = await createCategory({
@@ -114,6 +113,7 @@ export function CategoriesPage() {
     setEditName(category.name);
     setEditErrorMessage("");
     setEditSuccessMessage("");
+    setCreateSuccessMessage("");
   }
 
   function cancelEditing() {
@@ -126,6 +126,7 @@ export function CategoriesPage() {
     try {
       setEditErrorMessage("");
       setEditSuccessMessage("");
+      setCreateSuccessMessage("");
       setIsUpdating(true);
 
       const updatedCategory = await updateCategory(categoryId, {
@@ -159,9 +160,14 @@ export function CategoriesPage() {
         }
 
         if (apiMessage === "VALIDATION_ERROR" && validationDetails?.length) {
-          setEditErrorMessage(
-            validationDetails[0].message ?? "Données invalides."
-          );
+          const message = validationDetails[0].message;
+
+          if (message?.includes("Too small")) {
+            setEditErrorMessage("Le nom doit contenir au moins 2 caractères.");
+            return;
+          }
+
+          setEditErrorMessage("Le nom de la catégorie est invalide.");
           return;
         }
 
@@ -181,6 +187,7 @@ export function CategoriesPage() {
     if (!categoryToDelete) return;
 
     try {
+      setErrorMessage("");
       await deleteCategory(categoryToDelete.id);
 
       setCategories((previous) =>
@@ -188,6 +195,7 @@ export function CategoriesPage() {
       );
 
       setCategoryToDelete(null);
+      setEditSuccessMessage("Catégorie supprimée avec succès.");
     } catch (error) {
       console.error(error);
       setErrorMessage("Impossible de supprimer la catégorie.");
@@ -205,7 +213,6 @@ export function CategoriesPage() {
   return (
     <div className="categories-page">
       <div className="categories-page__layout">
-
         <div className="categories-page__card">
           <div className="categories-page__header">
             <h1 className="categories-page__title">Catégories</h1>
@@ -220,10 +227,14 @@ export function CategoriesPage() {
             </p>
           )}
 
-          {sortedCategories.length === 0 ? (
-            <p className="categories-page__empty">
-              Aucune catégorie à afficher.
+          {editSuccessMessage && (
+            <p className="categories-page__message categories-page__message--success">
+              {editSuccessMessage}
             </p>
+          )}
+
+          {sortedCategories.length === 0 ? (
+            <p className="categories-page__empty">Aucune catégorie à afficher.</p>
           ) : (
             <table className="categories-page__table">
               <thead>
@@ -246,9 +257,7 @@ export function CategoriesPage() {
                           <input
                             type="text"
                             value={editName}
-                            onChange={(event) =>
-                              setEditName(event.target.value)
-                            }
+                            onChange={(event) => setEditName(event.target.value)}
                             className="categories-page__input"
                           />
                         ) : (
@@ -259,9 +268,7 @@ export function CategoriesPage() {
                       <td>{category.slug}</td>
 
                       <td>
-                        {new Date(category.createdAt).toLocaleDateString(
-                          "fr-FR"
-                        )}
+                        {new Date(category.createdAt).toLocaleDateString("fr-FR")}
                       </td>
 
                       <td>
@@ -270,13 +277,11 @@ export function CategoriesPage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleUpdateCategory(category.id)
-                                }
+                                onClick={() => handleUpdateCategory(category.id)}
                                 disabled={isUpdating}
                                 className="categories-page__action-button categories-page__action-button--save"
                               >
-                                Enregistrer
+                                {isUpdating ? "Enregistrement..." : "Enregistrer"}
                               </button>
 
                               <button
@@ -299,9 +304,7 @@ export function CategoriesPage() {
 
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setCategoryToDelete(category)
-                                }
+                                onClick={() => setCategoryToDelete(category)}
                                 className="categories-page__action-button categories-page__action-button--delete"
                               >
                                 Supprimer
@@ -316,26 +319,29 @@ export function CategoriesPage() {
               </tbody>
             </table>
           )}
+
+          {editErrorMessage && (
+            <p className="categories-page__message categories-page__message--error">
+              {editErrorMessage}
+            </p>
+          )}
         </div>
 
         <div className="categories-page__form-card">
-          <h2 className="categories-page__form-title">
-            Créer une catégorie
-          </h2>
+          <h2 className="categories-page__form-title">Créer une catégorie</h2>
 
           <form
             onSubmit={handleCreateCategory}
             className="categories-page__form"
           >
             <div className="categories-page__form-group">
-              <label>Nom</label>
+              <label htmlFor="category-name">Nom</label>
 
               <input
+                id="category-name"
                 type="text"
                 value={createName}
-                onChange={(event) =>
-                  setCreateName(event.target.value)
-                }
+                onChange={(event) => setCreateName(event.target.value)}
                 className="categories-page__input"
                 placeholder="Ex : Stress"
               />
@@ -355,7 +361,7 @@ export function CategoriesPage() {
 
             <button
               type="submit"
-              disabled={isCreating}
+              disabled={isCreating || createName.trim().length < 2}
               className="categories-page__create-button"
             >
               {isCreating ? "Création..." : "Créer la catégorie"}
@@ -366,7 +372,10 @@ export function CategoriesPage() {
 
       {categoryToDelete && (
         <div className="categories-modal">
-          <div className="categories-modal__overlay" />
+          <div
+            className="categories-modal__overlay"
+            onClick={() => setCategoryToDelete(null)}
+          />
 
           <div className="categories-modal__content">
             <h3>Supprimer la catégorie</h3>
