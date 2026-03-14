@@ -1,32 +1,109 @@
-import { Link, Outlet } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import "./AdminLayout.css";
 
 export function AdminLayout() {
-  return (
-    //Sidebar
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <aside
-        style={{
-          width: "220px",
-          padding: "20px",
-          backgroundColor: "#f5f5f5",
-          borderRight: "1px solid #ddd",
-        }}
-      >
-        <h2>CESIZen Admin</h2>
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
-        {/* Menu de Navigation */}
-        <nav style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <Link to="/admin">Dashboard</Link>
-          <Link to="/admin/users">Utilisateurs</Link>
-          <Link to="/admin/articles">Articles</Link>
-          <Link to="/admin/categories">Catégories</Link>
+  const userName = localStorage.getItem("userName");
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("userName");
+    navigate("/", { replace: true });
+  };
+
+  return (
+    <div className="admin-layout">
+      {isMenuOpen && <div className="admin-overlay" onClick={closeMenu} />}
+
+      <aside className={`admin-sidebar ${isMenuOpen ? "open" : ""}`}>
+        <div className="admin-sidebar-header">
+          <h2>CESIZen Admin</h2>
+
+          <button
+            className="admin-close-button"
+            onClick={closeMenu}
+            aria-label="Fermer le menu"
+          >
+            ×
+          </button>
+        </div>
+
+        <nav className="admin-nav">
+          <NavLink
+            to="/admin"
+            end
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              `admin-nav-link ${isActive ? "active" : ""}`
+            }
+          >
+            Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/admin/users"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              `admin-nav-link ${isActive ? "active" : ""}`
+            }
+          >
+            Utilisateurs
+          </NavLink>
+
+          <NavLink
+            to="/admin/articles"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              `admin-nav-link ${isActive ? "active" : ""}`
+            }
+          >
+            Articles
+          </NavLink>
+
+          <NavLink
+            to="/admin/categories"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              `admin-nav-link ${isActive ? "active" : ""}`
+            }
+          >
+            Catégories
+          </NavLink>
         </nav>
       </aside>
 
-      {/* Zone où le contenu des pages va apparaitre */}
-      <main style={{ flex: 1, padding: "24px" }}>
-        <Outlet />
-      </main>
+      <div className="admin-content">
+        <header className="admin-header">
+          <div className="admin-header-left">
+            <button
+              className="admin-burger-button"
+              onClick={() => setIsMenuOpen(true)}
+              aria-label="Ouvrir le menu"
+            >
+              ☰
+            </button>
+
+            <span className="admin-welcome">
+              Bienvenue {userName ?? "Admin"}
+            </span>
+          </div>
+
+          <button className="admin-logout-button" onClick={handleLogout}>
+            Déconnexion
+          </button>
+        </header>
+
+        <main className="admin-main">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

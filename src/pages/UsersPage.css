@@ -1,0 +1,246 @@
+.users-page {
+  width: 100%;
+}
+
+.users-page__card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.users-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.users-page__title {
+  margin: 0;
+  font-size: 28px;
+  color: #1f2937;
+}
+
+.users-page__search {
+  width: 280px;
+  max-width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  outline: none;
+  font-size: 14px;
+}
+
+.users-page__search:focus {
+  border-color: #5a8b7a;
+}
+
+.users-page__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-page__head-row {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.users-page__sortable,
+.users-page__actions-header {
+  text-align: left;
+  padding: 14px 8px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.users-page__sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.users-page__row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.2s ease;
+}
+
+.users-page__row--hovered {
+  background-color: #f9fafb;
+}
+
+.users-page__cell {
+  padding: 16px 8px;
+  color: #374151;
+}
+
+.users-page__name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.users-page__name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.users-page__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.users-page__avatar--admin {
+  border: 2px solid #5a8b7a;
+}
+
+.users-page__badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.users-page__badge--admin {
+  background-color: #5a8b7a;
+  color: #ffffff;
+}
+
+.users-page__badge--user {
+  background-color: #e8f0ec;
+  color: #303a3c;
+}
+
+.users-page__status-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.users-page__toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.users-page__toggle--active {
+  background-color: #5a8b7a;
+}
+
+.users-page__toggle--inactive {
+  background-color: #d1d5db;
+}
+
+.users-page__toggle--disabled {
+  background-color: #e5e7eb;
+  cursor: not-allowed;
+}
+
+.users-page__toggle-thumb {
+  position: absolute;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+
+.users-page__toggle-thumb--active {
+  left: 23px;
+}
+
+.users-page__toggle-thumb--inactive {
+  left: 3px;
+}
+
+.users-page__status-text {
+  font-weight: 500;
+}
+
+.users-page__status-text--active {
+  color: #059669;
+}
+
+.users-page__status-text--inactive {
+  color: #6b7280;
+}
+
+.users-page__status-text--admin {
+  color: #9ca3af;
+}
+
+.users-page__edit-button {
+  border: none;
+  background: none;
+  color: #059669;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.users-page__edit-button:hover {
+  text-decoration: underline;
+}
+
+.users-page__empty {
+  margin: 0;
+  color: #6b7280;
+}
+
+.users-page__error {
+  color: crimson;
+}
+
+.users-page__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.users-page__pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.users-page__pagination-button,
+.users-page__pagination-number {
+  border: 1px solid #d7e3dd;
+  background-color: #ffffff;
+  color: #355447;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.users-page__pagination-button:hover,
+.users-page__pagination-number:hover {
+  background-color: #edf5f0;
+}
+
+.users-page__pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.users-page__pagination-number--active {
+  background-color: #5a8b7a;
+  color: #ffffff;
+  border-color: #5a8b7a;
+}
