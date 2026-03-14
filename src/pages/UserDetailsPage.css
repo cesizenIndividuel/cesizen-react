@@ -148,3 +148,22 @@
     font-size: 1.6rem;
   }
 }
+
+.user-details__input--disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background-color: #f3f4f6;
+}
+
+.user-details__field select:disabled,
+.user-details__field input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  background-color: #f3f4f6;
+}
+
+.user-details__field-help {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}

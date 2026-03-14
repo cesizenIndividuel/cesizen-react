@@ -82,7 +82,7 @@ export function UserDetailsPage() {
         firstName: firstName.trim() || undefined,
         lastName: lastName.trim() || undefined,
         role,
-        isActive,
+        isActive: isAdminUser ? true : isActive,
       };
 
       const updatedUser = await updateUser(id, payload);
@@ -142,6 +142,8 @@ export function UserDetailsPage() {
   if (errorMessage && !user) {
     return <p className="user-details__error">{errorMessage}</p>;
   }
+
+  const isAdminUser = user?.role === "ADMIN";
 
   return (
     <div className="user-details">
@@ -223,10 +225,18 @@ export function UserDetailsPage() {
                 id="status"
                 value={isActive ? "active" : "inactive"}
                 onChange={(event) => setIsActive(event.target.value === "active")}
+                disabled={isAdminUser}
+                className={isAdminUser ? "user-details__input--disabled" : ""}
               >
                 <option value="active">Actif</option>
                 <option value="inactive">Désactivé</option>
               </select>
+
+              {isAdminUser && (
+                <p className="user-details__field-help">
+                  Le statut d’un administrateur ne peut pas être modifié.
+                </p>
+              )}
             </div>
           </div>
 
