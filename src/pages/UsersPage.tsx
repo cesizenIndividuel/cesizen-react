@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createUser, getUsers, updateUserStatus } from "../api/users.api";
 import type { User } from "../types/user";
 import "./UsersPage.css";
+import { Link } from "react-router-dom";
 
 type SortField = "name" | "email" | "role" | "status";
 type SortDirection = "asc" | "desc";
@@ -396,13 +397,12 @@ export function UsersPage() {
                           </span>
                         </div>
                       </td>
-
-                      <td className="users-page__cell">
-                        <button type="button" className="users-page__edit-button">
-                          Modifier
-                        </button>
-                      </td>
-                    </tr>
+                        <td className="users-page__cell">
+                          <Link to={`/admin/users/${user.id}`} className="users-page__edit-button">
+                            Modifier
+                          </Link>
+                        </td> 
+                      </tr>
                   ))}
                 </tbody>
               </table>
