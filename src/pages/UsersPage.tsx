@@ -38,6 +38,7 @@ export function UsersPage() {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [hoveredUserId, setHoveredUserId] = useState<string | null>(null);
 
   async function handleToggleUser(user: User) {
     try {
@@ -198,232 +199,206 @@ export function UsersPage() {
           />
         </div>
 
-        {filteredUsers.length === 0 ? (
-          <p style={{ margin: 0, color: "#6b7280" }}>
-            Aucun utilisateur à afficher.
-          </p>
-        ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-            }}
-          >
-            <thead>
-              <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
-                <th
-                  onClick={() => handleSort("name")}
-                  style={{
-                    textAlign: "left",
-                    padding: "14px 8px",
-                    color: "#4b5563",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                >
-                  Nom{getSortIndicator("name", sortField, sortDirection)}
-                </th>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+          }}
+        >
+          <thead>
+            <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+              <th
+                onClick={() => handleSort("name")}
+                style={{
+                  textAlign: "left",
+                  padding: "14px 8px",
+                  cursor: "pointer",
+                }}
+              >
+                Nom{getSortIndicator("name", sortField, sortDirection)}
+              </th>
 
-                <th
-                  onClick={() => handleSort("email")}
-                  style={{
-                    textAlign: "left",
-                    padding: "14px 8px",
-                    color: "#4b5563",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                >
-                  Email{getSortIndicator("email", sortField, sortDirection)}
-                </th>
+              <th
+                onClick={() => handleSort("email")}
+                style={{
+                  textAlign: "left",
+                  padding: "14px 8px",
+                  cursor: "pointer",
+                }}
+              >
+                Email{getSortIndicator("email", sortField, sortDirection)}
+              </th>
 
-                <th
-                  onClick={() => handleSort("role")}
-                  style={{
-                    textAlign: "left",
-                    padding: "14px 8px",
-                    color: "#4b5563",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                >
-                  Rôle{getSortIndicator("role", sortField, sortDirection)}
-                </th>
+              <th
+                onClick={() => handleSort("role")}
+                style={{
+                  textAlign: "left",
+                  padding: "14px 8px",
+                  cursor: "pointer",
+                }}
+              >
+                Rôle{getSortIndicator("role", sortField, sortDirection)}
+              </th>
 
-                <th
-                  onClick={() => handleSort("status")}
-                  style={{
-                    textAlign: "left",
-                    padding: "14px 8px",
-                    color: "#4b5563",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                >
-                  Statut{getSortIndicator("status", sortField, sortDirection)}
-                </th>
+              <th
+                onClick={() => handleSort("status")}
+                style={{
+                  textAlign: "left",
+                  padding: "14px 8px",
+                  cursor: "pointer",
+                }}
+              >
+                Statut{getSortIndicator("status", sortField, sortDirection)}
+              </th>
 
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "14px 8px",
-                    color: "#4b5563",
-                    fontSize: "14px",
-                  }}
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
+              <th style={{ textAlign: "left", padding: "14px 8px" }}>
+                Actions
+              </th>
+            </tr>
+          </thead>
 
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  style={{
-                    borderBottom: "1px solid #f1f5f9",
-                  }}
-                >
-                  <td
+          <tbody>
+            {filteredUsers.map((user) => (
+              <tr
+                key={user.id}
+                onMouseEnter={() => setHoveredUserId(user.id)}
+                onMouseLeave={() => setHoveredUserId(null)}
+                style={{
+                  borderBottom: "1px solid #f1f5f9",
+                  backgroundColor:
+                    hoveredUserId === user.id ? "#f9fafb" : "#ffffff",
+                  transition: "background-color 0.2s",
+                }}
+              >
+                {/* NOM + AVATAR */}
+                <td style={{ padding: "16px 8px" }}>
+                  <div
                     style={{
-                      padding: "16px 8px",
-                      color: "#1f2937",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
                       fontWeight: 500,
                     }}
                   >
-                    {getFullName(user)}
-                  </td>
-
-                  <td
-                    style={{
-                      padding: "16px 8px",
-                      color: "#374151",
-                    }}
-                  >
-                    {user.email}
-                  </td>
-
-                  <td
-                    style={{
-                      padding: "16px 8px",
-                    }}
-                  >
-                    <span
+                    <img
+                      src={
+                        user.avatarUrl ??
+                        (user.role === "ADMIN"
+                          ? "/avatar-admin.png"
+                          : "/avatar-user.png")
+                      }
+                      alt={getFullName(user)}
                       style={{
-                        display: "inline-block",
-                        padding: "6px 12px",
-                        borderRadius: "999px",
-                        backgroundColor:
-                          user.role === "ADMIN" ? "#5A8B7A" : "#E8F0EC",
-                        color: user.role === "ADMIN" ? "#FFFFFF" : "#303A3C",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {getRoleLabel(user.role)}
-                    </span>
-                  </td>
-
-                  <td
-                    style={{
-                      padding: "16px 8px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        disabled={user.role === "ADMIN"}
-                        onClick={() => {
-                          if (user.role !== "ADMIN") {
-                            handleToggleUser(user);
-                          }
-                        }}
-                        title={
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border:
                           user.role === "ADMIN"
-                            ? "Un administrateur ne peut pas être désactivé"
-                            : ""
-                        }
-                        style={{
-                          position: "relative",
-                          width: "44px",
-                          height: "24px",
-                          border: "none",
-                          borderRadius: "999px",
-                          backgroundColor:
-                            user.role === "ADMIN"
-                              ? "#E5E7EB"
-                              : user.isActive
-                              ? "#5A8B7A"
-                              : "#D1D5DB",
-                          cursor: user.role === "ADMIN" ? "not-allowed" : "pointer",
-                          transition: "0.2s",
-                          padding: 0,
-                        }}
-                      >
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: "3px",
-                            left: user.isActive ? "23px" : "3px",
-                            width: "18px",
-                            height: "18px",
-                            borderRadius: "50%",
-                            backgroundColor: "#FFFFFF",
-                            transition: "0.2s",
-                          }}
-                        />
-                      </button>
+                            ? "2px solid #5A8B7A"
+                            : "2px solid transparent",
+                      }}
+                    />
 
-                      <span
-                        style={{
-                          color:
-                            user.role === "ADMIN"
-                              ? "#9CA3AF"
-                              : user.isActive
-                              ? "#059669"
-                              : "#6b7280",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {user.isActive ? "Actif" : "Désactivé"}
-                      </span>
-                    </div>
-                  </td>
+                    {getFullName(user)}
+                  </div>
+                </td>
 
-                  <td
+                <td style={{ padding: "16px 8px" }}>{user.email}</td>
+
+                <td style={{ padding: "16px 8px" }}>
+                  <span
                     style={{
-                      padding: "16px 8px",
+                      padding: "6px 12px",
+                      borderRadius: "999px",
+                      backgroundColor:
+                        user.role === "ADMIN" ? "#5A8B7A" : "#E8F0EC",
+                      color: user.role === "ADMIN" ? "#fff" : "#303A3C",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {getRoleLabel(user.role)}
+                  </span>
+                </td>
+
+                <td style={{ padding: "16px 8px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
                     }}
                   >
                     <button
-                      type="button"
+                      disabled={user.role === "ADMIN"}
+                      onClick={() => {
+                        if (user.role !== "ADMIN") {
+                          handleToggleUser(user);
+                        }
+                      }}
                       style={{
+                        width: "44px",
+                        height: "24px",
+                        borderRadius: "999px",
                         border: "none",
-                        background: "none",
-                        color: "#059669",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        padding: 0,
+                        backgroundColor:
+                          user.role === "ADMIN"
+                            ? "#E5E7EB"
+                            : user.isActive
+                            ? "#5A8B7A"
+                            : "#D1D5DB",
+                        cursor:
+                          user.role === "ADMIN" ? "not-allowed" : "pointer",
+                        position: "relative",
                       }}
                     >
-                      Modifier
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: "3px",
+                          left: user.isActive ? "23px" : "3px",
+                          width: "18px",
+                          height: "18px",
+                          borderRadius: "50%",
+                          backgroundColor: "#fff",
+                        }}
+                      />
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+
+                    <span
+                      style={{
+                        color:
+                          user.role === "ADMIN"
+                            ? "#9CA3AF"
+                            : user.isActive
+                            ? "#059669"
+                            : "#6b7280",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {user.isActive ? "Actif" : "Désactivé"}
+                    </span>
+                  </div>
+                </td>
+
+                <td style={{ padding: "16px 8px" }}>
+                  <button
+                    style={{
+                      border: "none",
+                      background: "none",
+                      color: "#059669",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Modifier
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
