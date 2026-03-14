@@ -27,7 +27,9 @@ export function UsersPage() {
       const updatedUser = await updateUserStatus(user.id, !user.isActive);
 
       setUsers((previousUsers) =>
-        previousUsers.map((u) => (u.id === user.id ? updatedUser : u))
+        previousUsers.map((u) =>
+          u.id === user.id ? { ...u, isActive: updatedUser.isActive } : u
+        )
       );
     } catch (error) {
       console.error(error);
