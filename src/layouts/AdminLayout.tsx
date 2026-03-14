@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 function getNavLinkStyle(isActive: boolean) {
   return {
@@ -16,11 +16,18 @@ function getNavLinkStyle(isActive: boolean) {
 
 export function AdminLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+  const navigate = useNavigate();
+
   const userName = localStorage.getItem("userName");
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("userName");
+    navigate("/", { replace: true });
   };
 
   return (
@@ -123,7 +130,7 @@ export function AdminLayout() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            justifyContent: "space-between",
             padding: "16px 24px",
             backgroundColor: "#ffffff",
             borderBottom: "1px solid #e5e5e5",
@@ -132,27 +139,50 @@ export function AdminLayout() {
             zIndex: 10,
           }}
         >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+            }}
+          >
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              style={{
+                border: "none",
+                backgroundColor: "#5A8B7A",
+                color: "#ffffff",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                cursor: "pointer",
+                fontSize: "20px",
+                lineHeight: 1,
+              }}
+              aria-label="Ouvrir le menu"
+            >
+              ☰
+            </button>
+
+            <span style={{ fontWeight: 600 }}>
+              Bienvenue {userName ?? "Admin"}
+            </span>
+          </div>
+
           <button
-            onClick={() => setIsMenuOpen(true)}
+            onClick={handleLogout}
             style={{
               border: "none",
               backgroundColor: "#5A8B7A",
               color: "#ffffff",
               borderRadius: "8px",
-              padding: "8px 12px",
+              padding: "10px 14px",
               cursor: "pointer",
-              fontSize: "20px",
-              lineHeight: 1,
+              fontWeight: 600,
             }}
-            aria-label="Ouvrir le menu"
+            aria-label="Se déconnecter"
           >
-            ☰
+            Déconnexion
           </button>
-
-          <span style={{ fontWeight: 600 }}>
-            Bienvenue {userName ?? "Admin"}
-          </span>
-
         </header>
 
         <main
