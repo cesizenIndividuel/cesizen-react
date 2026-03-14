@@ -41,15 +41,15 @@ export function LoginPage() {
 
       const result = await login(data);
 
-      setAccessToken(result.accessToken);
-      setStoredUser(result.user);
-
       if (result.user.role !== "ADMIN") {
         setApiError(
           "Accès refusé : cette interface est réservée aux administrateurs."
         );
         return;
       }
+
+      setAccessToken(result.accessToken);
+      setStoredUser(result.user);
       navigate("/admin");
 
     } catch (error: unknown) {

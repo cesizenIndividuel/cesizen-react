@@ -1,60 +1,61 @@
 import axios from "axios";
-import { refreshToken } from "./auth.api";
 import { clearAuthStorage, getAccessToken, setAccessToken } from "../utils/auth";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-//Creation du client : permet d'avoir une configuration pour toutes les requetes
+// Client principal pour les appels API classiques
 export const apiClient = axios.create({
   baseURL: `${API_URL}/api`,
   headers: { "Content-Type": "application/json" },
-  withCredentials: true, //cookie
+  withCredentials: true,
 });
 
-//Permet de modifier les requetes avant de l'envoyer au serveur
+// Client séparé pour refresh le token
+const refreshClient = axios.create({
+  baseURL: `${API_URL}/api`,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+});
+
+// Ajout automatique du token d'accès dans les requêtes
 apiClient.interceptors.request.use((config) => {
   const token = getAccessToken();
 
-  if (token) config.headers.Authorization = `Bearer ${token}`; //ajout du token dans le header
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
   return config;
 });
 
-//Permet de gérer les erreurs provenant du serveur 
+// Gestion automatique du refresh token en cas de 401
 apiClient.interceptors.response.use(
-  //Si la reponse est correcte on l'envoie telle quelle
   (response) => response,
-  //Si erreur 
   async (error) => {
-    const originalRequest = error.config; //contient la requete initiale qui a échoué
+    const originalRequest = error.config;
 
-    // On verifie : 
-    // 1. le serveur a repondu une erreur 401
-    // 2. Le requete exite
-    // 3. La requete n'a pas deja été retenté 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry)
-    {
-      originalRequest._retry = true; //evite une boucle
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      originalRequest.url !== "/auth/refresh"
+    ) {
+      originalRequest._retry = true;
 
       try {
-        //on demande un nouveau token au back
-        const result = await refreshToken();
+        const response = await refreshClient.post("/auth/refresh");
+        const newAccessToken = response.data.accessToken;
 
-        //On le stocke
-        setAccessToken(result.accessToken);
+        setAccessToken(newAccessToken);
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-        //On ajoute le nouveau token dans la requete originale
-        originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
-
-        //On relande la requete avec le nouveau token 
         return apiClient(originalRequest);
-      } 
-      catch {
-        clearAuthStorage(); //on supprime ttes les données d'authentification 
-        window.location.href = "/"; //page login 
+      } catch {
+        clearAuthStorage();
+        window.location.href = "/";
       }
     }
 
-    return Promise.reject(error); // si erreur pas token => renvoie erreur normalement
+    return Promise.reject(error);
   }
 );

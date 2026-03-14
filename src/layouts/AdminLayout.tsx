@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { clearAuthStorage, getStoredUser } from "../utils/auth";
 import "./AdminLayout.css";
 
 export function AdminLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const userName = localStorage.getItem("userName");
+  const storedUser = getStoredUser();
 
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("userName");
+    clearAuthStorage();
     navigate("/", { replace: true });
   };
 
@@ -91,7 +91,7 @@ export function AdminLayout() {
             </button>
 
             <span className="admin-welcome">
-              Bienvenue {userName ?? "Admin"}
+              Bienvenue {storedUser?.role === "ADMIN" ? "Admin" : "Utilisateur"}
             </span>
           </div>
 

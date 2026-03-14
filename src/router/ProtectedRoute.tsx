@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { getAccessToken, getStoredUser } from "../utils/auth";
 
-//Protege certaines routes : Verifie si le user est connecté et admin
+// Protège certaines routes : vérifie si le user est connecté et admin
 export function ProtectedRoute() {
   const token = getAccessToken();
   const user = getStoredUser();
@@ -11,8 +11,12 @@ export function ProtectedRoute() {
   }
 
   if (user.role !== "ADMIN") {
-    return <Navigate to="/" replace />; //page login
+    return <Navigate to="/" replace />;
   }
 
-  return <Outlet />; //route enfant 
+  if (!user.isActive) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
 }
