@@ -16,6 +16,8 @@ function getNavLinkStyle(isActive: boolean) {
 
 export function AdminLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const userName = localStorage.getItem("userName");
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -133,8 +135,9 @@ export function AdminLayout() {
           <button
             onClick={() => setIsMenuOpen(true)}
             style={{
-              border: "1px solid #ddd",
-              backgroundColor: "#fff",
+              border: "none",
+              backgroundColor: "#5A8B7A",
+              color: "#ffffff",
               borderRadius: "8px",
               padding: "8px 12px",
               cursor: "pointer",
@@ -146,7 +149,10 @@ export function AdminLayout() {
             ☰
           </button>
 
-          <span style={{ fontWeight: 700 }}>Administration</span>
+          <span style={{ fontWeight: 600 }}>
+            Bienvenue {userName ?? "Admin"}
+          </span>
+
         </header>
 
         <main
