@@ -2,9 +2,11 @@ import axios from "axios";
 import { refreshToken } from "./auth.api";
 import { clearAuthStorage, getAccessToken, setAccessToken } from "../utils/auth";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 //Creation du client : permet d'avoir une configuration pour toutes les requetes
 export const apiClient = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: `${API_URL}/api`,
   headers: { "Content-Type": "application/json" },
   withCredentials: true, //cookie
 });

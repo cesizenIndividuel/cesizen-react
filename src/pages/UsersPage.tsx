@@ -33,12 +33,13 @@ function getSortIndicator(
 }
 
 function getUserAvatarSrc(user: User) {
+  const API_URL = import.meta.env.VITE_API_URL;
   if (user.avatarUrl) {
     if (user.avatarUrl.startsWith("http")) {
       return user.avatarUrl;
     }
 
-    return `http://localhost:3000${user.avatarUrl}`;
+    return `${API_URL}${user.avatarUrl}`;
   }
 
   return user.role === "ADMIN" ? "/avatar-admin.png" : "/avatar-user.png";
