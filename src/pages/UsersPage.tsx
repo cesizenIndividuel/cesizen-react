@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getUsers } from "../api/users.api";
+import { getUsers, updateUserStatus } from "../api/users.api";
 import type { User } from "../types/user";
 
 function getRoleLabel(role: User["role"]) {
@@ -21,6 +21,19 @@ export function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [search, setSearch] = useState("");
+
+  async function handleToggleUser(user: User) {
+    try {
+      const updatedUser = await updateUserStatus(user.id, !user.isActive);
+
+      setUsers((previousUsers) =>
+        previousUsers.map((u) => (u.id === user.id ? updatedUser : u))
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Impossible de modifier le statut.");
+    }
+  }
 
   useEffect(() => {
     async function loadUsers() {
@@ -220,8 +233,7 @@ export function UsersPage() {
                         borderRadius: "999px",
                         backgroundColor:
                           user.role === "ADMIN" ? "#5A8B7A" : "#E8F0EC",
-                        color:
-                          user.role === "ADMIN" ? "#FFFF" : "#303A3C",
+                        color: user.role === "ADMIN" ? "#FFFF" : "#303A3C",
                         fontSize: "13px",
                         fontWeight: 600,
                       }}
@@ -244,6 +256,7 @@ export function UsersPage() {
                     >
                       <button
                         type="button"
+                        onClick={() => handleToggleUser(user)}
                         style={{
                           position: "relative",
                           width: "44px",
