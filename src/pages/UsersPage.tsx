@@ -31,6 +31,20 @@ function getSortIndicator(
   return direction === "asc" ? " ↑" : " ↓";
 }
 
+function getUserAvatarSrc(user: User) {
+  if (user.avatarUrl) {
+    if (user.avatarUrl.startsWith("http")) {
+      return user.avatarUrl;
+    }
+
+    return `http://localhost:3000${user.avatarUrl}`;
+  }
+
+  return user.role === "ADMIN"
+    ? "/avatar-admin.png"
+    : "/avatar-user.png";
+}
+
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +60,9 @@ export function UsersPage() {
 
       setUsers((previousUsers) =>
         previousUsers.map((u) =>
-          u.id === user.id ? { ...u, isActive: updatedUser.isActive } : u
+          u.id === user.id
+            ? { ...u, isActive: updatedUser.isActive }
+            : u
         )
       );
     } catch (error) {
@@ -209,44 +225,28 @@ export function UsersPage() {
             <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
               <th
                 onClick={() => handleSort("name")}
-                style={{
-                  textAlign: "left",
-                  padding: "14px 8px",
-                  cursor: "pointer",
-                }}
+                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
               >
                 Nom{getSortIndicator("name", sortField, sortDirection)}
               </th>
 
               <th
                 onClick={() => handleSort("email")}
-                style={{
-                  textAlign: "left",
-                  padding: "14px 8px",
-                  cursor: "pointer",
-                }}
+                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
               >
                 Email{getSortIndicator("email", sortField, sortDirection)}
               </th>
 
               <th
                 onClick={() => handleSort("role")}
-                style={{
-                  textAlign: "left",
-                  padding: "14px 8px",
-                  cursor: "pointer",
-                }}
+                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
               >
                 Rôle{getSortIndicator("role", sortField, sortDirection)}
               </th>
 
               <th
                 onClick={() => handleSort("status")}
-                style={{
-                  textAlign: "left",
-                  padding: "14px 8px",
-                  cursor: "pointer",
-                }}
+                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
               >
                 Statut{getSortIndicator("status", sortField, sortDirection)}
               </th>
@@ -281,12 +281,7 @@ export function UsersPage() {
                     }}
                   >
                     <img
-                      src={
-                        user.avatarUrl ??
-                        (user.role === "ADMIN"
-                          ? "/avatar-admin.png"
-                          : "/avatar-user.png")
-                      }
+                      src={getUserAvatarSrc(user)}
                       alt={getFullName(user)}
                       style={{
                         width: "32px",
