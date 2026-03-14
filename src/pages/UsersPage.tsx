@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getUsers, updateUserStatus } from "../api/users.api";
 import type { User } from "../types/user";
+import "./UsersPage.css";
 
 type SortField = "name" | "email" | "role" | "status";
 type SortDirection = "asc" | "desc";
@@ -40,9 +41,7 @@ function getUserAvatarSrc(user: User) {
     return `http://localhost:3000${user.avatarUrl}`;
   }
 
-  return user.role === "ADMIN"
-    ? "/avatar-admin.png"
-    : "/avatar-user.png";
+  return user.role === "ADMIN" ? "/avatar-admin.png" : "/avatar-user.png";
 }
 
 export function UsersPage() {
@@ -60,9 +59,7 @@ export function UsersPage() {
 
       setUsers((previousUsers) =>
         previousUsers.map((u) =>
-          u.id === user.id
-            ? { ...u, isActive: updatedUser.isActive }
-            : u
+          u.id === user.id ? { ...u, isActive: updatedUser.isActive } : u
         )
       );
     } catch (error) {
@@ -164,236 +161,160 @@ export function UsersPage() {
   }
 
   if (errorMessage) {
-    return <p style={{ color: "crimson" }}>{errorMessage}</p>;
+    return <p className="users-page__error">{errorMessage}</p>;
   }
 
   return (
-    <div>
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          border: "1px solid #e5e7eb",
-          borderRadius: "20px",
-          padding: "24px",
-          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.04)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px",
-            marginBottom: "24px",
-            flexWrap: "wrap",
-          }}
-        >
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "28px",
-              color: "#1f2937",
-            }}
-          >
-            Utilisateurs
-          </h1>
+    <div className="users-page">
+      <div className="users-page__card">
+        <div className="users-page__header">
+          <h1 className="users-page__title">Utilisateurs</h1>
 
           <input
             type="text"
             placeholder="Rechercher par email..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            style={{
-              width: "280px",
-              maxWidth: "100%",
-              padding: "12px 14px",
-              border: "1px solid #e5e7eb",
-              borderRadius: "12px",
-              outline: "none",
-              fontSize: "14px",
-            }}
+            className="users-page__search"
           />
         </div>
 
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-          }}
-        >
-          <thead>
-            <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
-              <th
-                onClick={() => handleSort("name")}
-                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
-              >
-                Nom{getSortIndicator("name", sortField, sortDirection)}
-              </th>
+        {filteredUsers.length === 0 ? (
+          <p className="users-page__empty">Aucun utilisateur à afficher.</p>
+        ) : (
+          <table className="users-page__table">
+            <thead>
+              <tr className="users-page__head-row">
+                <th
+                  onClick={() => handleSort("name")}
+                  className="users-page__sortable"
+                >
+                  Nom{getSortIndicator("name", sortField, sortDirection)}
+                </th>
 
-              <th
-                onClick={() => handleSort("email")}
-                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
-              >
-                Email{getSortIndicator("email", sortField, sortDirection)}
-              </th>
+                <th
+                  onClick={() => handleSort("email")}
+                  className="users-page__sortable"
+                >
+                  Email{getSortIndicator("email", sortField, sortDirection)}
+                </th>
 
-              <th
-                onClick={() => handleSort("role")}
-                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
-              >
-                Rôle{getSortIndicator("role", sortField, sortDirection)}
-              </th>
+                <th
+                  onClick={() => handleSort("role")}
+                  className="users-page__sortable"
+                >
+                  Rôle{getSortIndicator("role", sortField, sortDirection)}
+                </th>
 
-              <th
-                onClick={() => handleSort("status")}
-                style={{ textAlign: "left", padding: "14px 8px", cursor: "pointer" }}
-              >
-                Statut{getSortIndicator("status", sortField, sortDirection)}
-              </th>
+                <th
+                  onClick={() => handleSort("status")}
+                  className="users-page__sortable"
+                >
+                  Statut{getSortIndicator("status", sortField, sortDirection)}
+                </th>
 
-              <th style={{ textAlign: "left", padding: "14px 8px" }}>
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr
-                key={user.id}
-                onMouseEnter={() => setHoveredUserId(user.id)}
-                onMouseLeave={() => setHoveredUserId(null)}
-                style={{
-                  borderBottom: "1px solid #f1f5f9",
-                  backgroundColor:
-                    hoveredUserId === user.id ? "#f9fafb" : "#ffffff",
-                  transition: "background-color 0.2s",
-                }}
-              >
-                {/* NOM + AVATAR */}
-                <td style={{ padding: "16px 8px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    <img
-                      src={getUserAvatarSrc(user)}
-                      alt={getFullName(user)}
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        border:
-                          user.role === "ADMIN"
-                            ? "2px solid #5A8B7A"
-                            : "2px solid transparent",
-                      }}
-                    />
-
-                    {getFullName(user)}
-                  </div>
-                </td>
-
-                <td style={{ padding: "16px 8px" }}>{user.email}</td>
-
-                <td style={{ padding: "16px 8px" }}>
-                  <span
-                    style={{
-                      padding: "6px 12px",
-                      borderRadius: "999px",
-                      backgroundColor:
-                        user.role === "ADMIN" ? "#5A8B7A" : "#E8F0EC",
-                      color: user.role === "ADMIN" ? "#fff" : "#303A3C",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {getRoleLabel(user.role)}
-                  </span>
-                </td>
-
-                <td style={{ padding: "16px 8px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
-                    <button
-                      disabled={user.role === "ADMIN"}
-                      onClick={() => {
-                        if (user.role !== "ADMIN") {
-                          handleToggleUser(user);
-                        }
-                      }}
-                      style={{
-                        width: "44px",
-                        height: "24px",
-                        borderRadius: "999px",
-                        border: "none",
-                        backgroundColor:
-                          user.role === "ADMIN"
-                            ? "#E5E7EB"
-                            : user.isActive
-                            ? "#5A8B7A"
-                            : "#D1D5DB",
-                        cursor:
-                          user.role === "ADMIN" ? "not-allowed" : "pointer",
-                        position: "relative",
-                      }}
-                    >
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: "3px",
-                          left: user.isActive ? "23px" : "3px",
-                          width: "18px",
-                          height: "18px",
-                          borderRadius: "50%",
-                          backgroundColor: "#fff",
-                        }}
-                      />
-                    </button>
-
-                    <span
-                      style={{
-                        color:
-                          user.role === "ADMIN"
-                            ? "#9CA3AF"
-                            : user.isActive
-                            ? "#059669"
-                            : "#6b7280",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {user.isActive ? "Actif" : "Désactivé"}
-                    </span>
-                  </div>
-                </td>
-
-                <td style={{ padding: "16px 8px" }}>
-                  <button
-                    style={{
-                      border: "none",
-                      background: "none",
-                      color: "#059669",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Modifier
-                  </button>
-                </td>
+                <th className="users-page__actions-header">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr
+                  key={user.id}
+                  onMouseEnter={() => setHoveredUserId(user.id)}
+                  onMouseLeave={() => setHoveredUserId(null)}
+                  className={`users-page__row ${
+                    hoveredUserId === user.id ? "users-page__row--hovered" : ""
+                  }`}
+                >
+                  <td className="users-page__cell">
+                    <div className="users-page__name-cell">
+                      <img
+                        src={getUserAvatarSrc(user)}
+                        alt={getFullName(user)}
+                        className={`users-page__avatar ${
+                          user.role === "ADMIN"
+                            ? "users-page__avatar--admin"
+                            : ""
+                        }`}
+                      />
+
+                      <span className="users-page__name">
+                        {getFullName(user)}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td className="users-page__cell">{user.email}</td>
+
+                  <td className="users-page__cell">
+                    <span
+                      className={`users-page__badge ${
+                        user.role === "ADMIN"
+                          ? "users-page__badge--admin"
+                          : "users-page__badge--user"
+                      }`}
+                    >
+                      {getRoleLabel(user.role)}
+                    </span>
+                  </td>
+
+                  <td className="users-page__cell">
+                    <div className="users-page__status-cell">
+                      <button
+                        type="button"
+                        disabled={user.role === "ADMIN"}
+                        onClick={() => {
+                          if (user.role !== "ADMIN") {
+                            handleToggleUser(user);
+                          }
+                        }}
+                        title={
+                          user.role === "ADMIN"
+                            ? "Un administrateur ne peut pas être désactivé"
+                            : ""
+                        }
+                        className={`users-page__toggle ${
+                          user.role === "ADMIN"
+                            ? "users-page__toggle--disabled"
+                            : user.isActive
+                            ? "users-page__toggle--active"
+                            : "users-page__toggle--inactive"
+                        }`}
+                      >
+                        <span
+                          className={`users-page__toggle-thumb ${
+                            user.isActive
+                              ? "users-page__toggle-thumb--active"
+                              : "users-page__toggle-thumb--inactive"
+                          }`}
+                        />
+                      </button>
+
+                      <span
+                        className={`users-page__status-text ${
+                          user.role === "ADMIN"
+                            ? "users-page__status-text--admin"
+                            : user.isActive
+                            ? "users-page__status-text--active"
+                            : "users-page__status-text--inactive"
+                        }`}
+                      >
+                        {user.isActive ? "Actif" : "Désactivé"}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td className="users-page__cell">
+                    <button type="button" className="users-page__edit-button">
+                      Modifier
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
