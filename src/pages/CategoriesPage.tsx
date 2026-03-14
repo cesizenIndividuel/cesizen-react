@@ -33,6 +33,8 @@ export function CategoriesPage() {
   const [editSuccessMessage, setEditSuccessMessage] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -51,7 +53,9 @@ export function CategoriesPage() {
   }, []);
 
   const sortedCategories = useMemo(() => {
-    return [...categories].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    return [...categories].sort((a, b) =>
+      a.name.localeCompare(b.name, "fr")
+    );
   }, [categories]);
 
   async function handleCreateCategory(event: React.FormEvent<HTMLFormElement>) {
@@ -168,43 +172,19 @@ export function CategoriesPage() {
     }
   }
 
-  async function handleDeleteCategory(categoryId: string) {
-    const confirmed = window.confirm(
-      "Voulez-vous vraiment supprimer cette catégorie ?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
+  async function handleDeleteCategory() {
+    if (!categoryToDelete) return;
 
     try {
-      setErrorMessage("");
-      await deleteCategory(categoryId);
+      await deleteCategory(categoryToDelete.id);
 
       setCategories((previous) =>
-        previous.filter((category) => category.id !== categoryId)
+        previous.filter((c) => c.id !== categoryToDelete.id)
       );
 
-      if (editingCategoryId === categoryId) {
-        cancelEditing();
-      }
-    } catch (error: unknown) {
+      setCategoryToDelete(null);
+    } catch (error) {
       console.error(error);
-
-      if (axios.isAxiosError<ApiValidationError>(error)) {
-        const apiMessage = error.response?.data?.error;
-
-        if (apiMessage === "CATEGORY_NOT_FOUND") {
-          setErrorMessage("Catégorie introuvable.");
-          return;
-        }
-
-        if (apiMessage) {
-          setErrorMessage(apiMessage);
-          return;
-        }
-      }
-
       setErrorMessage("Impossible de supprimer la catégorie.");
     }
   }
@@ -220,6 +200,7 @@ export function CategoriesPage() {
   return (
     <div className="categories-page">
       <div className="categories-page__layout">
+
         <div className="categories-page__card">
           <div className="categories-page__header">
             <h1 className="categories-page__title">Catégories</h1>
@@ -231,12 +212,6 @@ export function CategoriesPage() {
           {errorMessage && (
             <p className="categories-page__message categories-page__message--error">
               {errorMessage}
-            </p>
-          )}
-
-          {editSuccessMessage && (
-            <p className="categories-page__message categories-page__message--success">
-              {editSuccessMessage}
             </p>
           )}
 
@@ -266,7 +241,9 @@ export function CategoriesPage() {
                           <input
                             type="text"
                             value={editName}
-                            onChange={(event) => setEditName(event.target.value)}
+                            onChange={(event) =>
+                              setEditName(event.target.value)
+                            }
                             className="categories-page__input"
                           />
                         ) : (
@@ -277,7 +254,9 @@ export function CategoriesPage() {
                       <td>{category.slug}</td>
 
                       <td>
-                        {new Date(category.createdAt).toLocaleDateString("fr-FR")}
+                        {new Date(category.createdAt).toLocaleDateString(
+                          "fr-FR"
+                        )}
                       </td>
 
                       <td>
@@ -286,11 +265,13 @@ export function CategoriesPage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => handleUpdateCategory(category.id)}
+                                onClick={() =>
+                                  handleUpdateCategory(category.id)
+                                }
                                 disabled={isUpdating}
                                 className="categories-page__action-button categories-page__action-button--save"
                               >
-                                {isUpdating ? "Enregistrement..." : "Enregistrer"}
+                                Enregistrer
                               </button>
 
                               <button
@@ -313,7 +294,9 @@ export function CategoriesPage() {
 
                               <button
                                 type="button"
-                                onClick={() => handleDeleteCategory(category.id)}
+                                onClick={() =>
+                                  setCategoryToDelete(category)
+                                }
                                 className="categories-page__action-button categories-page__action-button--delete"
                               >
                                 Supprimer
@@ -328,30 +311,28 @@ export function CategoriesPage() {
               </tbody>
             </table>
           )}
-
-          {editErrorMessage && (
-            <p className="categories-page__message categories-page__message--error">
-              {editErrorMessage}
-            </p>
-          )}
         </div>
 
         <div className="categories-page__form-card">
-          <h2 className="categories-page__form-title">Créer une catégorie</h2>
+          <h2 className="categories-page__form-title">
+            Créer une catégorie
+          </h2>
 
           <form
             onSubmit={handleCreateCategory}
             className="categories-page__form"
           >
             <div className="categories-page__form-group">
-              <label htmlFor="category-name">Nom</label>
+              <label>Nom</label>
+
               <input
-                id="category-name"
                 type="text"
                 value={createName}
-                onChange={(event) => setCreateName(event.target.value)}
+                onChange={(event) =>
+                  setCreateName(event.target.value)
+                }
                 className="categories-page__input"
-                placeholder="Exemple : Stress"
+                placeholder="Ex : Stress"
               />
             </div>
 
@@ -377,6 +358,43 @@ export function CategoriesPage() {
           </form>
         </div>
       </div>
+
+      {categoryToDelete && (
+        <div className="categories-modal">
+          <div className="categories-modal__overlay" />
+
+          <div className="categories-modal__content">
+            <h3>Supprimer la catégorie</h3>
+
+            <p>
+              Voulez-vous vraiment supprimer la catégorie
+              <strong> {categoryToDelete.name}</strong> ?
+            </p>
+
+            <p className="categories-modal__warning">
+              Cette action est irréversible.
+            </p>
+
+            <div className="categories-modal__actions">
+              <button
+                type="button"
+                className="categories-modal__cancel"
+                onClick={() => setCategoryToDelete(null)}
+              >
+                Annuler
+              </button>
+
+              <button
+                type="button"
+                className="categories-modal__delete"
+                onClick={handleDeleteCategory}
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
