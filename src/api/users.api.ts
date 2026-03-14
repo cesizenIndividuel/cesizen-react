@@ -8,10 +8,7 @@ export async function getUsers(): Promise<User[]> {
 }
 
 //Mise a jour d'un user
-export async function updateUserStatus(
-  userId: string,
-  isActive: boolean
-) {
+export async function updateUserStatus(userId: string, isActive: boolean) {
   const response = await apiClient.patch<User>(
     `/users/${userId}/status`,
     { isActive }

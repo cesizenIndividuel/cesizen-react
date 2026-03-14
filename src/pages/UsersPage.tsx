@@ -44,6 +44,8 @@ function getUserAvatarSrc(user: User) {
   return user.role === "ADMIN" ? "/avatar-admin.png" : "/avatar-user.png";
 }
 
+//------------------------------------------------------------//
+
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,10 +55,12 @@ export function UsersPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [hoveredUserId, setHoveredUserId] = useState<string | null>(null);
 
+  //Activation et désactivation utilisateur 
   async function handleToggleUser(user: User) {
     try {
       const updatedUser = await updateUserStatus(user.id, !user.isActive);
 
+      //Maj du user concerné
       setUsers((previousUsers) =>
         previousUsers.map((u) =>
           u.id === user.id ? { ...u, isActive: updatedUser.isActive } : u
@@ -68,6 +72,7 @@ export function UsersPage() {
     }
   }
 
+  //Gestion du tri
   function handleSort(field: SortField) {
     if (sortField === field) {
       setSortDirection((previousDirection) =>
@@ -100,6 +105,7 @@ export function UsersPage() {
   const filteredUsers = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
+    //filtre
     const result = users.filter((user) => {
       if (!normalizedSearch) {
         return true;
@@ -116,6 +122,7 @@ export function UsersPage() {
       );
     });
 
+    //tri
     result.sort((a, b) => {
       let valueA = "";
       let valueB = "";
