@@ -86,9 +86,14 @@ export function CategoriesPage() {
         }
 
         if (apiMessage === "VALIDATION_ERROR" && validationDetails?.length) {
-          setCreateErrorMessage(
-            validationDetails[0].message ?? "Données invalides."
-          );
+          const message = validationDetails[0].message;
+
+          if (message?.includes("Too small")) {
+            setCreateErrorMessage("Le nom doit contenir au moins 2 caractères.");
+            return;
+          }
+
+          setCreateErrorMessage("Le nom de la catégorie est invalide.");
           return;
         }
 
