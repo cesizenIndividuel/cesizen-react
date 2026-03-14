@@ -2,8 +2,8 @@ import { apiClient } from "./client";
 import type { User } from "../types/user";
 
 type CreateUserPayload = {
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   pseudo: string;
   email: string;
   password: string;

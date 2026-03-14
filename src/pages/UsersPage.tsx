@@ -3,10 +3,18 @@ import { createUser, getUsers, updateUserStatus } from "../api/users.api";
 import type { User } from "../types/user";
 import "./UsersPage.css";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 type SortField = "name" | "email" | "role" | "status";
 type SortDirection = "asc" | "desc";
 type CreateUserRole = "USER" | "ADMIN";
+type ApiValidationError = {
+  error?: string;
+  details?: Array<{
+    path?: (string | number)[];
+    message?: string;
+  }>;
+};
 
 function getRoleLabel(role: User["role"]) {
   return role === "ADMIN" ? "Administrateur" : "Utilisateur";
@@ -91,28 +99,18 @@ export function UsersPage() {
     try {
       setCreateErrorMessage("");
       setCreateSuccessMessage("");
-
-      if (
-        !createFirstName.trim() ||
-        !createLastName.trim() ||
-        !createPseudo.trim() ||
-        !createEmail.trim() ||
-        !createPassword.trim()
-      ) {
-        setCreateErrorMessage("Tous les champs sont obligatoires.");
-        return;
-      }
-
       setIsCreatingUser(true);
 
-      const createdUser = await createUser({
-        firstName: createFirstName.trim(),
-        lastName: createLastName.trim(),
+      const payload = {
+        firstName: createFirstName.trim() || undefined,
+        lastName: createLastName.trim() || undefined,
         pseudo: createPseudo.trim(),
         email: createEmail.trim(),
         password: createPassword,
         role: createRole,
-      });
+      };
+
+      const createdUser = await createUser(payload);
 
       setUsers((previousUsers) => [createdUser, ...previousUsers]);
 
@@ -124,8 +122,36 @@ export function UsersPage() {
       setCreateRole("USER");
       setCreateSuccessMessage("Utilisateur créé avec succès.");
       setCurrentPage(1);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
+
+      if (axios.isAxiosError<ApiValidationError>(error)) {
+        const apiMessage = error.response?.data?.error;
+        const validationDetails = error.response?.data?.details;
+
+        if (apiMessage === "EMAIL_ALREADY_USED") {
+          setCreateErrorMessage("Cette adresse email est déjà utilisée.");
+          return;
+        }
+
+        if (apiMessage === "PSEUDO_ALREADY_USED") {
+          setCreateErrorMessage("Ce pseudo est déjà utilisé.");
+          return;
+        }
+
+        if (apiMessage === "VALIDATION_ERROR" && validationDetails?.length) {
+          setCreateErrorMessage(
+            validationDetails[0].message ?? "Données invalides."
+          );
+          return;
+        }
+
+        if (apiMessage) {
+          setCreateErrorMessage(apiMessage);
+          return;
+        }
+      }
+
       setCreateErrorMessage("Impossible de créer l'utilisateur.");
     } finally {
       setIsCreatingUser(false);
