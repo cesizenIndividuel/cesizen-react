@@ -2,11 +2,14 @@
   border: 1px solid #dbe3ec;
   border-radius: 16px;
   background: #ffffff;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .rte__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -14,6 +17,7 @@
   padding: 14px;
   border-bottom: 1px solid #e2e8f0;
   background: linear-gradient(to bottom, #fcfdfd, #f8fafc);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
 }
 
 .rte__group {
