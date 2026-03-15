@@ -9,9 +9,7 @@ export function AdminLayout() {
 
   const storedUser = getStoredUser();
 
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
+  const closeMenu = () => { setIsMenuOpen(false) };
 
   const handleLogout = () => {
     clearAuthStorage();

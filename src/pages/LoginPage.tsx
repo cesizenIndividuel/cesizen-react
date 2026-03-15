@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { login } from "../api/auth.api";
 import { setAccessToken, setStoredUser } from "../utils/auth";
+import "./LoginPage.css";
 
 const loginSchema = z.object({
   email: z.email("Veuillez saisir un email valide."),
@@ -16,12 +17,10 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 type ApiErrorResponse = { error?: string };
 
-
 export function LoginPage() {
   const navigate = useNavigate();
   const [apiError, setApiError] = useState("");
 
-  //Configuration du formulaire
   const {
     register,
     handleSubmit,
@@ -34,10 +33,9 @@ export function LoginPage() {
     },
   });
 
-  //Appeller quand le formualilre est soumsi et les données sont valides
   const onSubmit = async (data: LoginFormData) => {
     try {
-      setApiError(""); //nouvelle connexion pour supprimer les erreurs précédantes
+      setApiError("");
 
       const result = await login(data);
 
@@ -51,9 +49,7 @@ export function LoginPage() {
       setAccessToken(result.accessToken);
       setStoredUser(result.user);
       navigate("/admin");
-
     } catch (error: unknown) {
-      //si erreur axios : recupération du code erreur ernvoyé par le back
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
         const apiMessage = error.response?.data?.error;
 
@@ -67,96 +63,62 @@ export function LoginPage() {
           return;
         }
       }
-      //si pas erreur axios
+
       setApiError("Une erreur est survenue lors de la connexion.");
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#f7f7f7",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          padding: "32px",
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-        }}
-      >
-        <h1 style={{ marginBottom: "8px" }}>Connexion admin</h1>
-        <p style={{ marginBottom: "24px", color: "#666" }}>
+    <div className="login-page">
+      <div className="login-page__card">
+        <h1 className="login-page__title">Connexion admin</h1>
+        <p className="login-page__subtitle">
           Connecte-toi pour accéder au back-office CESIZen.
         </p>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-        >
-          <div>
-            <label htmlFor="email">E-mail</label>
+        <form className="login-page__form" onSubmit={handleSubmit(onSubmit)}>
+          <div className="login-page__field">
+            <label className="login-page__label" htmlFor="email">
+              E-mail
+            </label>
             <input
               id="email"
               type="email"
+              className={`login-page__input ${
+                errors.email ? "login-page__input--error" : ""
+              }`}
+              placeholder="admin@cesizen.fr"
               {...register("email")}
-              style={{
-                width: "100%",
-                marginTop: "6px",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-              }}
             />
             {errors.email && (
-              <p style={{ color: "crimson", marginTop: "6px" }}>
-                {errors.email.message}
-              </p>
+              <p className="login-page__error">{errors.email.message}</p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="password">Mot de passe</label>
+          <div className="login-page__field">
+            <label className="login-page__label" htmlFor="password">
+              Mot de passe
+            </label>
             <input
               id="password"
               type="password"
+              className={`login-page__input ${
+                errors.password ? "login-page__input--error" : ""
+              }`}
+              placeholder="Votre mot de passe"
               {...register("password")}
-              style={{
-                width: "100%",
-                marginTop: "6px",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-              }}
             />
             {errors.password && (
-              <p style={{ color: "crimson", marginTop: "6px" }}>
-                {errors.password.message}
-              </p>
+              <p className="login-page__error">{errors.password.message}</p>
             )}
           </div>
 
-          {apiError && <p style={{ color: "crimson", margin: 0 }}>{apiError}</p>}
+          {apiError && <p className="login-page__api-error">{apiError}</p>}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            style={{
-              padding: "12px",
-              border: "none",
-              borderRadius: "8px",
-              backgroundColor: "#222",
-              color: "#fff",
-              cursor: "pointer",
-              opacity: isSubmitting ? 0.7 : 1,
-            }}
+            className="login-page__submit"
           >
             {isSubmitting ? "Connexion..." : "Se connecter"}
           </button>
