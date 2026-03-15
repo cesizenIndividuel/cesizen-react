@@ -43,6 +43,10 @@ export const router = createBrowserRouter([
             element: <ArticleFormPage />,
           },
           {
+            path: "articles/:id",
+            element: <ArticleFormPage />,
+          },
+          {
             path: "categories",
             element: <CategoriesPage />,
           },

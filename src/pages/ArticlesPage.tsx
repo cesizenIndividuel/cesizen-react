@@ -6,6 +6,7 @@ import "./ArticlesPage.css";
 import { Link } from "react-router-dom";
 
 
+
 type SortField = "title" | "author" | "status" | "date";
 type SortDirection = "asc" | "desc";
 
@@ -437,15 +438,12 @@ export function ArticlesPage() {
 
                     <td>
                       <div className="articles-page__actions">
-                        <button
-                          type="button"
-                          className="articles-page__action-button articles-page__action-button--edit"
-                          disabled
-                          title="La page détail article sera ajoutée ensuite"
-                        >
-                          Modifier
-                        </button>
-
+                      <Link
+                        to={`/admin/articles/${article.id}`}
+                        className="articles-page__action-button articles-page__action-button--edit"
+                      >
+                        Modifier
+                      </Link>
                         {isDraft && (
                           <button
                             type="button"

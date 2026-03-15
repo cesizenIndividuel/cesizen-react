@@ -59,3 +59,8 @@ export async function restoreArticle(articleId: string): Promise<AdminArticle> {
 export async function deleteArticle(articleId: string): Promise<void> {
   await apiClient.delete(`/articles/${articleId}`);
 }
+
+export async function getAdminArticleById(articleId: string): Promise<AdminArticle> {
+  const response = await apiClient.get(`/articles/${articleId}`);
+  return response.data;
+}

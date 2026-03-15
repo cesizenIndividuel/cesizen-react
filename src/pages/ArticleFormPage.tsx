@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { createArticle } from "../api/articles.api";
+import {
+  createArticle,
+  getAdminArticleById,
+  updateArticle,
+} from "../api/articles.api";
 import { getCategories } from "../api/categories.api";
+import { RichTextEditor } from "../components/RichTextEditor";
 import type { Category } from "../types/category";
 import "./ArticleFormPage.css";
-import { RichTextEditor } from "../components/RichTextEditor";
 
 type ApiValidationError = {
   error?: string;
@@ -17,6 +21,8 @@ type ApiValidationError = {
 
 export function ArticleFormPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -25,6 +31,7 @@ export function ArticleFormPage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingArticle, setLoadingArticle] = useState(isEditMode);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -45,6 +52,29 @@ export function ArticleFormPage() {
 
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    async function loadArticle() {
+      if (!id) return;
+
+      try {
+        setErrorMessage("");
+        const article = await getAdminArticleById(id);
+
+        setTitle(article.title ?? "");
+        setExcerpt(article.excerpt ?? "");
+        setContent(article.content ?? "");
+        setSelectedCategoryIds(article.categories.map((category) => category.id));
+      } catch (error) {
+        console.error(error);
+        setErrorMessage("Impossible de charger l'article.");
+      } finally {
+        setLoadingArticle(false);
+      }
+    }
+
+    loadArticle();
+  }, [id]);
 
   function toggleCategory(categoryId: string) {
     setSelectedCategoryIds((previous) =>
@@ -70,15 +100,17 @@ export function ArticleFormPage() {
           selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
       };
 
-      const article = await createArticle(payload);
-
-      setSuccessMessage("Article enregistré en brouillon avec succès.");
+      if (isEditMode && id) {
+        await updateArticle(id, payload);
+        setSuccessMessage("Article mis à jour avec succès.");
+      } else {
+        await createArticle(payload);
+        setSuccessMessage("Article enregistré en brouillon avec succès.");
+      }
 
       setTimeout(() => {
         navigate("/admin/articles");
       }, 800);
-
-      return article;
     } catch (error: unknown) {
       console.error(error);
 
@@ -88,6 +120,11 @@ export function ArticleFormPage() {
 
         if (apiMessage === "CATEGORY_NOT_FOUND") {
           setErrorMessage("Une ou plusieurs catégories sont introuvables.");
+          return;
+        }
+
+        if (apiMessage === "ARTICLE_NOT_FOUND") {
+          setErrorMessage("Article introuvable.");
           return;
         }
 
@@ -125,13 +162,21 @@ export function ArticleFormPage() {
     }
   }
 
+  if (loadingArticle) {
+    return <p>Chargement de l'article...</p>;
+  }
+
   return (
     <div className="article-form-page">
       <div className="article-form-page__topbar">
         <div>
-          <h1 className="article-form-page__title">Créer un article</h1>
+          <h1 className="article-form-page__title">
+            {isEditMode ? "Modifier un article" : "Créer un article"}
+          </h1>
           <p className="article-form-page__subtitle">
-            Rédigez un nouvel article qui sera enregistré en brouillon.
+            {isEditMode
+              ? "Modifiez le contenu de votre article."
+              : "Rédigez un nouvel article qui sera enregistré en brouillon."}
           </p>
         </div>
 
@@ -166,7 +211,6 @@ export function ArticleFormPage() {
 
           <div className="article-form-page__field">
             <label htmlFor="content">Contenu</label>
-
             <RichTextEditor
               value={content}
               onChange={setContent}
@@ -229,7 +273,11 @@ export function ArticleFormPage() {
               disabled={isSaving}
               className="article-form-page__save-button"
             >
-              {isSaving ? "Enregistrement..." : "Enregistrer le brouillon"}
+              {isSaving
+                ? "Enregistrement..."
+                : isEditMode
+                  ? "Enregistrer les modifications"
+                  : "Enregistrer le brouillon"}
             </button>
           </div>
         </form>
