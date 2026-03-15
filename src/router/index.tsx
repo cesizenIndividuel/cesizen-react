@@ -7,6 +7,8 @@ import { UsersPage } from "../pages/UsersPage";
 import { UserDetailsPage } from "../pages/UserDetailsPage";
 import { ArticlesPage } from "../pages/ArticlesPage";
 import { CategoriesPage } from "../pages/CategoriesPage";
+import { ArticleFormPage } from "../pages/ArticleFormPage";
+
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +37,10 @@ export const router = createBrowserRouter([
           {
             path: "articles",
             element: <ArticlesPage />,
+          },
+          {
+            path: "articles/new",
+            element: <ArticleFormPage />,
           },
           {
             path: "categories",

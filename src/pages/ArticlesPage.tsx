@@ -1,14 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import {
-  deleteArticle,
-  getAdminArticles,
-  publishArticle,
-  restoreArticle,
-  type AdminArticleStatusFilter,
-} from "../api/articles.api";
+import { deleteArticle, getAdminArticles, publishArticle, restoreArticle, type AdminArticleStatusFilter } from "../api/articles.api";
 import type { AdminArticle } from "../types/article";
 import "./ArticlesPage.css";
+import { Link } from "react-router-dom";
+
 
 type SortField = "title" | "author" | "status" | "date";
 type SortDirection = "asc" | "desc";
@@ -269,9 +265,10 @@ export function ArticlesPage() {
           </p>
         </div>
 
-        <button type="button" className="articles-page__create-button" disabled>
+        <Link to="/admin/articles/new" className="articles-page__create-button">
           Créer un article
-        </button>
+        </Link>
+
       </div>
 
       <div className="articles-page__toolbar">
