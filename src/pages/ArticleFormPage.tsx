@@ -5,6 +5,7 @@ import { createArticle } from "../api/articles.api";
 import { getCategories } from "../api/categories.api";
 import type { Category } from "../types/category";
 import "./ArticleFormPage.css";
+import { RichTextEditor } from "../components/RichTextEditor";
 
 type ApiValidationError = {
   error?: string;
@@ -165,12 +166,11 @@ export function ArticleFormPage() {
 
           <div className="article-form-page__field">
             <label htmlFor="content">Contenu</label>
-            <textarea
-              id="content"
+
+            <RichTextEditor
               value={content}
-              onChange={(event) => setContent(event.target.value)}
+              onChange={setContent}
               placeholder="Rédigez le contenu complet de l’article..."
-              rows={12}
             />
           </div>
 
@@ -178,9 +178,13 @@ export function ArticleFormPage() {
             <label>Catégories</label>
 
             {loadingCategories ? (
-              <p className="article-form-page__helper">Chargement des catégories...</p>
+              <p className="article-form-page__helper">
+                Chargement des catégories...
+              </p>
             ) : categories.length === 0 ? (
-              <p className="article-form-page__helper">Aucune catégorie disponible.</p>
+              <p className="article-form-page__helper">
+                Aucune catégorie disponible.
+              </p>
             ) : (
               <div className="article-form-page__categories">
                 {categories.map((category) => (
