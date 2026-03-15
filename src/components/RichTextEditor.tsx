@@ -1,21 +1,27 @@
+import { useRef } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyleKit } from "@tiptap/extension-text-style";
+import Image from "@tiptap/extension-image";
 import "./RichTextEditor.css";
 
 type RichTextEditorProps = {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  onImageUpload?: (file: File) => Promise<string>;
 };
 
 export function RichTextEditor({
   value,
   onChange,
   placeholder = "Commencez à écrire...",
+  onImageUpload,
 }: RichTextEditorProps) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -30,6 +36,7 @@ export function RichTextEditor({
         types: ["heading", "paragraph"],
       }),
       TextStyleKit,
+      Image,
     ],
     content: value,
     immediatelyRender: false,
@@ -38,14 +45,32 @@ export function RichTextEditor({
     },
   });
 
-  if (!editor) {
-    return null;
-  }
-
   function setFontSize(size: string) {
     if (!editor) return;
 
     editor.chain().focus().setMark("textStyle", { fontSize: size }).run();
+  }
+
+  async function handleImageFileChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files?.[0];
+
+    if (!file || !editor || !onImageUpload) return;
+
+    try {
+      const imageUrl = await onImageUpload(file);
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+    } catch (error) {
+      console.error(error);
+      alert("Impossible d'envoyer l'image.");
+    } finally {
+      event.target.value = "";
+    }
+  }
+
+  if (!editor) {
+    return null;
   }
 
   return (
@@ -117,6 +142,13 @@ export function RichTextEditor({
 
         <button
           type="button"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Image
+        </button>
+
+        <button
+          type="button"
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
           className={editor.isActive({ textAlign: "left" }) ? "is-active" : ""}
         >
@@ -154,6 +186,14 @@ export function RichTextEditor({
           <option value="22px">22</option>
           <option value="28px">28</option>
         </select>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={handleImageFileChange}
+        />
       </div>
 
       <EditorContent editor={editor} className="rte__content" />

@@ -1,15 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import {
-  createArticle,
-  getAdminArticleById,
-  updateArticle,
-} from "../api/articles.api";
+import { createArticle, getAdminArticleById, updateArticle, uploadArticleImage, uploadArticleContentImage } from "../api/articles.api";
 import { getCategories } from "../api/categories.api";
 import { RichTextEditor } from "../components/RichTextEditor";
 import type { Category } from "../types/category";
 import "./ArticleFormPage.css";
+
 
 type ApiValidationError = {
   error?: string;
@@ -18,6 +15,8 @@ type ApiValidationError = {
     message?: string;
   }>;
 };
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export function ArticleFormPage() {
   const navigate = useNavigate();
@@ -32,6 +31,9 @@ export function ArticleFormPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingArticle, setLoadingArticle] = useState(isEditMode);
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -65,6 +67,7 @@ export function ArticleFormPage() {
         setExcerpt(article.excerpt ?? "");
         setContent(article.content ?? "");
         setSelectedCategoryIds(article.categories.map((category) => category.id));
+        setCurrentImageUrl(article.imageUrl ?? null);
       } catch (error) {
         console.error(error);
         setErrorMessage("Impossible de charger l'article.");
@@ -84,6 +87,22 @@ export function ArticleFormPage() {
     );
   }
 
+  const previewImageUrl = useMemo(() => {
+    if (imageFile) {
+      return URL.createObjectURL(imageFile);
+    }
+
+    if (currentImageUrl) {
+      if (currentImageUrl.startsWith("http")) {
+        return currentImageUrl;
+      }
+
+      return `${API_URL}${currentImageUrl}`;
+    }
+
+    return null;
+  }, [imageFile, currentImageUrl]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -100,11 +119,27 @@ export function ArticleFormPage() {
           selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
       };
 
+      let savedArticleId: string | undefined;
+
       if (isEditMode && id) {
-        await updateArticle(id, payload);
+        const updatedArticle = await updateArticle(id, payload);
+        savedArticleId = updatedArticle.id;
+
+        if (imageFile) {
+          const articleWithImage = await uploadArticleImage(savedArticleId, imageFile);
+          setCurrentImageUrl(articleWithImage.imageUrl ?? null);
+        }
+
         setSuccessMessage("Article mis à jour avec succès.");
       } else {
-        await createArticle(payload);
+        const createdArticle = await createArticle(payload);
+        savedArticleId = createdArticle.id;
+
+        if (imageFile) {
+          const articleWithImage = await uploadArticleImage(savedArticleId, imageFile);
+          setCurrentImageUrl(articleWithImage.imageUrl ?? null);
+        }
+
         setSuccessMessage("Article enregistré en brouillon avec succès.");
       }
 
@@ -125,6 +160,11 @@ export function ArticleFormPage() {
 
         if (apiMessage === "ARTICLE_NOT_FOUND") {
           setErrorMessage("Article introuvable.");
+          return;
+        }
+
+        if (apiMessage === "NO_FILE_UPLOADED") {
+          setErrorMessage("Aucune image n’a été sélectionnée.");
           return;
         }
 
@@ -175,8 +215,8 @@ export function ArticleFormPage() {
           </h1>
           <p className="article-form-page__subtitle">
             {isEditMode
-              ? "Modifiez le contenu de votre article."
-              : "Rédigez un nouvel article qui sera enregistré en brouillon."}
+              ? "Modifiez le contenu, l’image principale et les catégories de votre article."
+              : "Rédigez un nouvel article, ajoutez une image principale et enregistrez-le en brouillon."}
           </p>
         </div>
 
@@ -210,11 +250,40 @@ export function ArticleFormPage() {
           </div>
 
           <div className="article-form-page__field">
+            <label htmlFor="coverImage">Image principale</label>
+
+            <input
+              id="coverImage"
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                setImageFile(file);
+              }}
+            />
+
+            {previewImageUrl && (
+              <div className="article-form-page__image-preview-wrapper">
+                <img
+                  src={previewImageUrl}
+                  alt="Aperçu de l’image principale"
+                  className="article-form-page__image-preview"
+                />
+              </div>
+            )}
+
+            <p className="article-form-page__helper">
+              Cette image sera utilisée comme image principale de l’article.
+            </p>
+          </div>
+
+          <div className="article-form-page__field">
             <label htmlFor="content">Contenu</label>
             <RichTextEditor
               value={content}
               onChange={setContent}
               placeholder="Rédigez le contenu complet de l’article..."
+              onImageUpload={uploadArticleContentImage}
             />
           </div>
 

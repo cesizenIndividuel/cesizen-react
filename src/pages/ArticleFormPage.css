@@ -64,10 +64,8 @@
   border-radius: 12px;
   font-size: 1rem;
   background: white;
-
   font-family: inherit;
 }
-
 
 .article-form-page__field textarea {
   resize: vertical;
@@ -76,6 +74,7 @@
 .article-form-page__helper {
   margin: 0;
   color: #64748b;
+  font-size: 0.95rem;
 }
 
 .article-form-page__categories {
@@ -93,6 +92,20 @@
   border-radius: 999px;
   padding: 10px 14px;
   cursor: pointer;
+}
+
+.article-form-page__image-preview-wrapper {
+  margin-top: 8px;
+}
+
+.article-form-page__image-preview {
+  width: 100%;
+  max-width: 320px;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
 .article-form-page__message {
