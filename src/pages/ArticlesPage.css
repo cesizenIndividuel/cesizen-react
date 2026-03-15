@@ -74,7 +74,7 @@
   padding: 14px 12px;
   border-bottom: 1px solid #e2e8f0;
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .articles-page__sortable {
@@ -85,7 +85,9 @@
 .articles-page__title-cell {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 6px;
+  min-height: 64px;
 }
 
 .articles-page__title-text {
@@ -96,6 +98,7 @@
 .articles-page__excerpt {
   font-size: 0.9rem;
   color: #64748b;
+  line-height: 1.4;
 }
 
 .articles-page__categories {
@@ -313,4 +316,21 @@
 .articles-page__filter-pill.active {
   background: #5a8b7a;
   color: white;
+}
+
+.articles-page__article-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.articles-page__thumbnail {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 12px;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
 }

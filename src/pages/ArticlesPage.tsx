@@ -33,6 +33,20 @@ function getStatusLabel(article: AdminArticle) {
   return "Brouillon";
 }
 
+function getArticleImageSrc(article: AdminArticle) {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  if (article.imageUrl) {
+    if (article.imageUrl.startsWith("http")) {
+      return article.imageUrl;
+    }
+
+    return `${API_URL}${article.imageUrl}`;
+  }
+
+  return "/article-placeholder.png";
+}
+
 function getSortIndicator(
   currentField: SortField,
   activeField: SortField,
@@ -384,16 +398,24 @@ export function ArticlesPage() {
                 return (
                   <tr key={article.id}>
                     <td>
-                      <div className="articles-page__title-cell">
-                        <span className="articles-page__title-text">
-                          {article.title}
-                        </span>
+                      <div className="articles-page__article-cell">
+                        <img
+                          src={getArticleImageSrc(article)}
+                          alt={article.title}
+                          className="articles-page__thumbnail"
+                        />
 
-                        {article.excerpt && (
-                          <span className="articles-page__excerpt">
-                            {article.excerpt}
+                        <div className="articles-page__title-cell">
+                          <span className="articles-page__title-text">
+                            {article.title}
                           </span>
-                        )}
+
+                          {article.excerpt && (
+                            <span className="articles-page__excerpt">
+                              {article.excerpt}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
 
