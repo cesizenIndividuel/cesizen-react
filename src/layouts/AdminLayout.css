@@ -154,10 +154,20 @@
 
 @media (min-width: 1024px) {
   .admin-overlay {
-    display: none;
+    display: block;
   }
 
   .admin-content {
     margin-left: 0;
+  }
+
+  .admin-burger-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-close-button {
+    display: block;
   }
 }

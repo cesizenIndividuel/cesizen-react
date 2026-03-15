@@ -76,6 +76,16 @@ export function AdminLayout() {
           >
             Catégories
           </NavLink>
+
+          <NavLink
+            to="/admin/diagnostics"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              `admin-nav-link ${isActive ? "active" : ""}`
+            }
+          >
+            Diagnostics
+          </NavLink>
         </nav>
       </aside>
 
