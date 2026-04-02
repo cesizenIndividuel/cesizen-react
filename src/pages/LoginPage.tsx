@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,10 +16,13 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 type ApiErrorResponse = { error?: string };
 
-
 export function LoginPage() {
   const navigate = useNavigate();
   const [apiError, setApiError] = useState("");
+
+  useEffect(() => {
+    document.title = "Connexion admin - CESIZen";
+  }, []);
 
   //Configuration du formulaire
   const {
@@ -51,7 +54,6 @@ export function LoginPage() {
       setAccessToken(result.accessToken);
       setStoredUser(result.user);
       navigate("/admin");
-
     } catch (error: unknown) {
       //si erreur axios : recupération du code erreur ernvoyé par le back
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
@@ -73,7 +75,7 @@ export function LoginPage() {
   };
 
   return (
-    <div
+    <main
       style={{
         minHeight: "100vh",
         display: "flex",
@@ -99,6 +101,7 @@ export function LoginPage() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
+          aria-label="Formulaire de connexion administrateur"
           style={{ display: "flex", flexDirection: "column", gap: "16px" }}
         >
           <div>
@@ -106,6 +109,7 @@ export function LoginPage() {
             <input
               id="email"
               type="email"
+              autoComplete="email"
               {...register("email")}
               style={{
                 width: "100%",
@@ -116,7 +120,7 @@ export function LoginPage() {
               }}
             />
             {errors.email && (
-              <p style={{ color: "crimson", marginTop: "6px" }}>
+              <p style={{ color: "crimson", marginTop: "6px" }} aria-live="polite">
                 {errors.email.message}
               </p>
             )}
@@ -127,6 +131,7 @@ export function LoginPage() {
             <input
               id="password"
               type="password"
+              autoComplete="current-password"
               {...register("password")}
               style={{
                 width: "100%",
@@ -137,13 +142,17 @@ export function LoginPage() {
               }}
             />
             {errors.password && (
-              <p style={{ color: "crimson", marginTop: "6px" }}>
+              <p style={{ color: "crimson", marginTop: "6px" }} aria-live="polite">
                 {errors.password.message}
               </p>
             )}
           </div>
 
-          {apiError && <p style={{ color: "crimson", margin: 0 }}>{apiError}</p>}
+          {apiError && (
+            <p style={{ color: "crimson", margin: 0 }} aria-live="polite" role="alert">
+              {apiError}
+            </p>
+          )}
 
           <button
             type="submit"
@@ -162,6 +171,6 @@ export function LoginPage() {
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
