@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# CESIZen React Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface d'administration de CESIZen construite avec React, TypeScript et Vite.
 
-Currently, two official plugins are available:
+## Fonctionnalites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Connexion admin avec validation des champs (React Hook Form + Zod)
+- Protection des routes d'administration selon token, role et statut utilisateur
+- Tableau de bord admin (stats + activite recente)
+- Gestion des utilisateurs (liste, details, creation, mise a jour, activation/desactivation, suppression)
+- Gestion des articles (liste, creation, edition, publication, restauration, suppression)
+- Upload d'image de couverture et d'images dans le contenu d'article
+- Gestion des categories (CRUD)
+- Rafraichissement automatique du token en cas d'expiration (intercepteur Axios)
 
-## React Compiler
+## Stack technique
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Axios
+- TanStack Query
+- React Hook Form
+- Zod
+- TipTap (editeur riche)
 
-## Expanding the ESLint configuration
+## Prerequis
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js 20+ recommande
+- npm 10+ recommande
+- Une API backend CESIZen accessible
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Configuration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Le front utilise la variable d'environnement suivante:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- `VITE_API_URL` : URL de base du backend (ex: `http://localhost:3000`)
+
+Creer un fichier `.env` a la racine du projet:
+
+```env
+VITE_API_URL=http://localhost:3000
 ```
+
+Le client HTTP cible ensuite automatiquement `VITE_API_URL/api`.
+
+## Lancer le projet
+
+Mode developpement:
+
+```bash
+npm run dev
+```
+
+Build de production:
+
+```bash
+npm run build
+```
+
+Previsualiser le build:
+
+```bash
+npm run preview
+```
+
+## Scripts disponibles
+
+- `npm run dev` : demarre le serveur Vite
+- `npm run build` : compile TypeScript puis genere le build Vite
+- `npm run preview` : sert le build localement
+
+## Structure du projet
+
+```text
+src/
+  api/          # Appels HTTP vers le backend
+  components/   # Composants reutilisables (ex: editeur riche)
+  layouts/      # Layouts d'ecran (ex: AdminLayout)
+  pages/        # Pages metier (login, dashboard, users, articles, categories)
+  router/       # Configuration des routes + protection d'acces
+  types/        # Types TypeScript metier
+  utils/        # Utilitaires (auth localStorage, etc.)
+```
+
+## Notes
+
+- Ce projet est le front office admin. Il depend du backend CESIZen pour fonctionner correctement.
