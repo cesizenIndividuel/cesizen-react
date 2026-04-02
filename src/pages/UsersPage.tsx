@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createUser, getUsers, updateUserStatus } from "../api/users.api";
+import { createUser, deleteUser, getUsers, updateUserStatus } from "../api/users.api";
 import type { User } from "../types/user";
 import "./UsersPage.css";
 import { Link } from "react-router-dom";
@@ -66,6 +66,9 @@ export function UsersPage() {
   const [hoveredUserId, setHoveredUserId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+
   const [createFirstName, setCreateFirstName] = useState("");
   const [createLastName, setCreateLastName] = useState("");
   const [createPseudo, setCreatePseudo] = useState("");
@@ -90,6 +93,27 @@ export function UsersPage() {
     } catch (error) {
       console.error(error);
       alert("Impossible de modifier le statut.");
+    }
+  }
+
+  async function handleConfirmDeleteUser() {
+    if (!userToDelete) return;
+
+    try {
+      setIsDeletingUser(true);
+
+      await deleteUser(userToDelete.id);
+
+      setUsers((previousUsers) =>
+        previousUsers.filter((user) => user.id !== userToDelete.id)
+      );
+
+      setUserToDelete(null);
+    } catch (error) {
+      console.error(error);
+      alert("Impossible de supprimer l'utilisateur.");
+    } finally {
+      setIsDeletingUser(false);
     }
   }
 
@@ -423,12 +447,29 @@ export function UsersPage() {
                           </span>
                         </div>
                       </td>
-                        <td className="users-page__cell">
+
+                      <td className="users-page__cell">
+                        <div className="users-page__actions">
                           <Link to={`/admin/users/${user.id}`} className="users-page__edit-button">
                             Modifier
                           </Link>
-                        </td> 
-                      </tr>
+
+                          <button
+                            type="button"
+                            onClick={() => setUserToDelete(user)}
+                            className="users-page__delete-button"
+                            disabled={user.role === "ADMIN"}
+                            title={
+                              user.role === "ADMIN"
+                                ? "Un administrateur ne peut pas être supprimé"
+                                : "Supprimer l'utilisateur"
+                            }
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -578,6 +619,43 @@ export function UsersPage() {
           </form>
         </div>
       </div>
+
+      {userToDelete && (
+        <div className="users-page__modal-overlay">
+          <div className="users-page__modal">
+            <h3 className="users-page__modal-title">Confirmer la suppression</h3>
+
+            <p className="users-page__modal-text">
+              Voulez-vous vraiment supprimer l’utilisateur{" "}
+              <strong>{getFullName(userToDelete)}</strong> ({userToDelete.email}) ?
+            </p>
+
+            <p className="users-page__modal-warning">
+              Cette action est définitive.
+            </p>
+
+            <div className="users-page__modal-actions">
+              <button
+                type="button"
+                onClick={() => setUserToDelete(null)}
+                className="users-page__modal-cancel"
+                disabled={isDeletingUser}
+              >
+                Annuler
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmDeleteUser}
+                className="users-page__modal-confirm"
+                disabled={isDeletingUser}
+              >
+                {isDeletingUser ? "Suppression..." : "Confirmer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -210,10 +210,37 @@
   font-weight: 600;
   cursor: pointer;
   padding: 0;
+  text-decoration: none;
 }
 
 .users-page__edit-button:hover {
   text-decoration: underline;
+}
+
+.users-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.users-page__delete-button {
+  border: none;
+  background: transparent;
+  color: #b42318;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.users-page__delete-button:hover {
+  text-decoration: underline;
+}
+
+.users-page__delete-button:disabled {
+  color: #98a2b3;
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
 .users-page__empty {
@@ -331,6 +358,85 @@
 
 .users-page__form-message--success {
   color: #18794e;
+}
+
+.users-page__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.users-page__modal {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+.users-page__modal-title {
+  margin: 0 0 12px 0;
+  color: #264236;
+  font-size: 1.4rem;
+}
+
+.users-page__modal-text {
+  margin: 0 0 8px 0;
+  color: #344054;
+  line-height: 1.5;
+}
+
+.users-page__modal-warning {
+  margin: 0 0 20px 0;
+  color: #b42318;
+  font-weight: 600;
+}
+
+.users-page__modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.users-page__modal-cancel,
+.users-page__modal-confirm {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.users-page__modal-cancel {
+  background: #eef2f0;
+  color: #355447;
+}
+
+.users-page__modal-cancel:hover {
+  background: #e4ebe7;
+}
+
+.users-page__modal-confirm {
+  background: #b42318;
+  color: #ffffff;
+}
+
+.users-page__modal-confirm:hover {
+  background: #9f1f15;
+}
+
+.users-page__modal-cancel:disabled,
+.users-page__modal-confirm:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 @media (max-width: 1100px) {

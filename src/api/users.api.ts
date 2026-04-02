@@ -51,3 +51,8 @@ export async function updateUser(userId: string, payload: UpdateUserPayload): Pr
   const response = await apiClient.patch(`/users/${userId}`, payload);
   return response.data;
 }
+
+// Suppression d'un utilisateur
+export async function deleteUser(userId: string): Promise<void> {
+  await apiClient.delete(`/users/${userId}`);
+}
