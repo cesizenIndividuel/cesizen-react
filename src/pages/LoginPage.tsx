@@ -94,7 +94,7 @@ export function LoginPage() {
       >
         <h1 style={{ marginBottom: "8px" }}>Connexion admin</h1>
         <p style={{ marginBottom: "24px", color: "#666" }}>
-          Connecte-toi pour accéder au back-office CESIZen.
+          Connectez-vous pour accéder au back-office Elyzen.
         </p>
 
         <form
