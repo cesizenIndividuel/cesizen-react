@@ -18,19 +18,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Récupération du code
+      - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Installation de Node.js
+      - name: Installation Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Installation des dépendances
+      - name: Installation dépendances
         run: npm ci
 
       - name: Vérification ESLint
         run: npm run lint
 
-      - name: Build du front
+      - name: Build application
         run: npm run build
