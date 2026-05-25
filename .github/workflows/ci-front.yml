@@ -1,0 +1,36 @@
+name: CI Front
+
+on:
+  push:
+    branches:
+      - dev
+      - rct
+      - main
+
+  pull_request:
+    branches:
+      - dev
+      - rct
+      - main
+
+jobs:
+  build-front:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installation dépendances
+        run: npm ci
+
+      - name: Vérification ESLint
+        run: npm run lint
+
+      - name: Build application
+        run: npm run build
