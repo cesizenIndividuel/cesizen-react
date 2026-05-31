@@ -1,0 +1,12 @@
+services:
+  front-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: cesizen-front-dev
+
+    ports:
+      - "5175:5173"
+
+    restart: unless-stopped
