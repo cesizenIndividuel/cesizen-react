@@ -6,24 +6,10 @@ on:
       - rct
 
 jobs:
-  build-deploy-front-rct:
+  deploy-front-rct:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
-
-      - name: Installer Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Installer les dépendances
-        run: npm ci
-
-      - name: Build du front
-        run: npm run build
-
       - name: Configurer SSH
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
@@ -38,10 +24,15 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/cesizen-react
+
             git fetch origin
             git reset --hard origin/rct
-            npm ci
-            npm run build
-            pkill -f "vite.*5174" || true
-            nohup npm run dev -- --host 0.0.0.0 --port 5174 --strictPort > front-rct.log 2>&1 &
+
+            echo "VITE_API_URL=http://74.162.71.41:3002" > .env
+
+            docker compose -f docker-compose.rct.yml down
+
+            docker compose -f docker-compose.rct.yml up -d --build
+
+            docker ps
           EOF
