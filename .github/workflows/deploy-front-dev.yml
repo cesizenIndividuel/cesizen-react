@@ -36,6 +36,8 @@ jobs:
 
             docker compose -f docker-compose.dev.yml build --no-cache
 
+            docker tag cesizen-react-dev-front-dev:latest cesizen-front:dev-latest
+
             docker compose -f docker-compose.dev.yml up -d
 
             docker ps
