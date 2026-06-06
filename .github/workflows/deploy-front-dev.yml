@@ -1,0 +1,44 @@
+name: Deploy Dev Front
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types:
+      - closed
+
+jobs:
+  deploy-dev:
+    if: github.event.pull_request.merged == true
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurer SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
+
+      - name: Déployer le front dev sur la VM Azure
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/cesizen-react-dev
+
+            git fetch origin
+            git reset --hard origin/dev
+
+            docker compose -f docker-compose.dev.yml down
+
+            docker compose -f docker-compose.dev.yml build --no-cache
+
+            docker tag cesizen-react-dev-front-dev:latest cesizen-front:dev-latest
+
+            docker compose -f docker-compose.dev.yml up -d
+
+            docker ps
+          EOF

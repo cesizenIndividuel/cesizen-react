@@ -92,7 +92,7 @@ export function LoginPage() {
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
         }}
       >
-        <h1 style={{ marginBottom: "8px" }}>Connexion pour admin</h1>
+        <h1 style={{ marginBottom: "8px" }}>Connexion pour admin TEST2</h1>
         <p style={{ marginBottom: "24px", color: "#666" }}>
           Connectez-vous pour accéder au back-office Elyzen.
         </p>
