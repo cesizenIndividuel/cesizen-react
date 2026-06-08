@@ -1,4 +1,4 @@
-name: Deploy Front Recette
+name: Deploy Front RCT
 
 on:
   push:
@@ -20,19 +20,10 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
 
-      - name: Déployer le front recette sur la VM
+      - name: Déployer le Front RCT
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/cesizen-react
+            cd ~/cesizen-rct
 
-            git fetch origin
-            git reset --hard origin/rct
-
-            echo "VITE_API_URL=http://74.162.71.41:3002" > .env
-
-            docker compose -f docker-compose.rct.yml down
-
-            docker compose -f docker-compose.rct.yml up -d --build
-
-            docker ps
+            docker compose -f docker-compose.rct.yml up -d --no-deps front
           EOF
