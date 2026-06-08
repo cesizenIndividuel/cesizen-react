@@ -1,4 +1,4 @@
-name: Deploy Dev Global
+name: Deploy Front Dev Global
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - dev
 
 jobs:
-  deploy-dev-global:
+  deploy-front-dev:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,28 +20,13 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
 
-      - name: Déployer l'environnement DEV global
+      - name: Déployer le Front DEV
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/cesizen-dev/front
             git fetch origin
             git reset --hard origin/dev
 
-            cd ~/cesizen-dev/api
-            git fetch origin
-            git reset --hard origin/dev
-
             cd ~/cesizen-dev
-
-            docker compose -f docker-compose.dev.yml down
             docker compose -f docker-compose.dev.yml up -d --build
-
-            docker compose -f docker-compose.dev.yml exec -T api-dev npx prisma migrate deploy
-            docker compose -f docker-compose.dev.yml exec -T api-dev npx prisma db seed || true
-
-            docker tag cesizen-dev-front-dev:latest cesizen-front:dev-latest
-            docker tag cesizen-dev-api-dev:latest cesizen-api:dev-latest
-
-            docker ps
-            docker images | grep cesizen
           EOF
