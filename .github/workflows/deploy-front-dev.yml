@@ -1,4 +1,4 @@
-name: Deploy Front Dev Global
+name: Deploy Front Dev
 
 on:
   push:
