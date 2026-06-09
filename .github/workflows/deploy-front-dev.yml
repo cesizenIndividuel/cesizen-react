@@ -29,7 +29,5 @@ jobs:
 
             cd ~/cesizen-dev
 
-            docker compose -f docker-compose.dev.yml down --remove-orphans
-            docker rm -f cesizen-front-dev cesizen-api-dev cesizen-db-dev || true
-            docker compose -f docker-compose.dev.yml up -d --build
+            docker compose -f docker-compose.dev.yml up -d --build front
           EOF
