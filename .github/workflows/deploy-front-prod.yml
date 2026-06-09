@@ -28,5 +28,7 @@ jobs:
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/cesizen-prod
 
-            docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate front
+            docker compose -f docker-compose.prod.yml stop front || true
+            docker compose -f docker-compose.prod.yml rm -f front || true
+            docker compose -f docker-compose.prod.yml up -d --no-deps front
           EOF
