@@ -29,8 +29,10 @@ jobs:
 
             cd ~/cesizen-dev
 
-            docker build -t cesizen-front:dev ./front
-            docker tag cesizen-front:dev cesizen-front:latest
-
+            docker compose -f docker-compose.dev.yml stop front || true
+            docker compose -f docker-compose.dev.yml rm -f front || true
+            docker compose -f docker-compose.dev.yml build --no-cache front
             docker compose -f docker-compose.dev.yml up -d --no-deps front
+
+            docker tag cesizen-dev-front:latest cesizen-front:latest || true
           EOF
