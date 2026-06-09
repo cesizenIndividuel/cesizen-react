@@ -25,5 +25,5 @@ jobs:
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/cesizen-rct
 
-            docker compose -f docker-compose.rct.yml up -d --no-deps front
+            docker compose -f docker-compose.rct.yml up -d --no-deps --force-recreate front
           EOF
