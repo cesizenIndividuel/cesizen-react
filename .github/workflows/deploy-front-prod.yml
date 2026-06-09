@@ -1,4 +1,4 @@
-name: Deploy Prod Front
+name: Deploy Front Prod
 
 on:
   pull_request:
