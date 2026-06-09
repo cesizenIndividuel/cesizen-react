@@ -1,29 +1,18 @@
-name: Deploy Front Production
+name: Deploy Prod Front
 
 on:
-  push:
-    tags:
-      - "v*"
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
 
 jobs:
-  deploy-front-prod:
+  deploy-prod-front:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
-
-      - name: Installer Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Installer les dépendances
-        run: npm ci
-
-      - name: Build du front
-        run: npm run build
-
       - name: Configurer SSH
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
@@ -34,11 +23,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
 
-      - name: Déployer le front production sur la VM
+      - name: Déployer le front en PROD
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/production-front
-            git fetch --all --tags
-            git checkout ${{ github.ref_name }}
-            sudo docker compose -f docker-compose.prod.yml up -d --build
+            cd ~/cesizen-prod/front
+            git fetch origin
+            git reset --hard origin/main
+
+            cd ~/cesizen-prod
+
+            docker compose -f docker-compose.prod.yml up -d --build front
           EOF
