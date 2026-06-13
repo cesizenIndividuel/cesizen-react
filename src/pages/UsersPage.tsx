@@ -286,7 +286,7 @@ export function UsersPage() {
       <div className="users-page__layout">
         <div className="users-page__card">
           <div className="users-page__header">
-            <h1 className="users-page__title">Utilisateurs</h1>
+            <h1 className="users-page__title">Utilisateurs Test</h1>
 
             <input
               type="text"
