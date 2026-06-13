@@ -1,6 +1,7 @@
 services:
   front:
     image: cesizen-front:latest
+    #utilise la dernière image construite pour le service front
     container_name: cesizen-front-dev
 
     ports:
