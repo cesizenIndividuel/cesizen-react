@@ -3,7 +3,7 @@ name: Deploy Front Dev
 on:
   pull_request:
     branches:
-      - main
+      - dev
     types:
       - closed
 

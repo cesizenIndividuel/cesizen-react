@@ -3,7 +3,7 @@ name: Deploy Front RCT
 on:
   pull_request:
     branches:
-      - main
+      - rct
     types:
       - closed
 
