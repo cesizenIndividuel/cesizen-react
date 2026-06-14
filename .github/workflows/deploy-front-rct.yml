@@ -1,9 +1,11 @@
 name: Deploy Front RCT
 
 on:
-  push:
+  pull_request:
     branches:
-      - rct
+      - main
+    types:
+      - closed
 
 jobs:
   deploy-front-rct:
