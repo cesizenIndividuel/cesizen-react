@@ -9,9 +9,8 @@ on:
 
 jobs:
   deploy-prod-front:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.merged == true
     steps:
       - name: Configurer SSH
         env:
