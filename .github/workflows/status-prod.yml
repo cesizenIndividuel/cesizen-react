@@ -1,0 +1,52 @@
+name: Docker PROD Status
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '0 7 * * *'
+
+jobs:
+  check-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurer SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
+
+      - name: Vérifier l'état de santé PROD
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e
+
+            echo "===== CONTENEURS PROD ====="
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep -E "cesizen-front-prod|cesizen-api-prod|cesizen-db-prod"
+
+            echo ""
+            echo "===== VERIFICATION FRONT ====="
+            curl -f -I https://cesizen-laura.duckdns.org
+
+            echo ""
+            echo "===== VERIFICATION API ====="
+            curl -f http://localhost:3000/api/health
+
+            echo ""
+            echo "===== VERIFICATION BDD ====="
+            docker exec cesizen-db-prod pg_isready -U cesizen -d cesizen_prod
+
+            echo ""
+            echo "===== IMAGES UTILISEES ====="
+            echo "Front : $(docker inspect cesizen-front-prod --format='{{.Config.Image}}')"
+            echo "API   : $(docker inspect cesizen-api-prod --format='{{.Config.Image}}')"
+            echo "BDD   : $(docker inspect cesizen-db-prod --format='{{.Config.Image}}')"
+
+            echo ""
+            echo "✅ PROD opérationnelle"
+          EOF

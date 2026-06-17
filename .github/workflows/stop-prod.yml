@@ -1,0 +1,38 @@
+name: Stop PROD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stop-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurer SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
+
+      - name: Arrêter la PROD
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e
+
+            echo "===== ARRET DES CONTENEURS PROD ====="
+
+            docker stop cesizen-front-prod || true
+            docker stop cesizen-api-prod || true
+            docker stop cesizen-db-prod || true
+
+            echo ""
+            echo "===== ETAT APRES ARRET ====="
+            docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep -E "cesizen-front-prod|cesizen-api-prod|cesizen-db-prod" || true
+
+            echo ""
+            echo "✅ PROD arrêtée"
+          EOF

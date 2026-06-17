@@ -1,0 +1,46 @@
+name: Start PROD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  start-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurer SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
+
+      - name: Démarrer la PROD
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e
+
+            echo "===== DEMARRAGE DE LA PROD ====="
+
+            cd ~/cesizen-prod
+
+            docker compose -f docker-compose.prod.yml up -d
+
+            echo ""
+            echo "===== ETAT DES CONTENEURS ====="
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep -E "cesizen-front-prod|cesizen-api-prod|cesizen-db-prod"
+
+            echo ""
+            echo "===== VERIFICATION API ====="
+            curl -f http://localhost:3000/api/health
+
+            echo ""
+            echo "===== VERIFICATION BDD ====="
+            docker exec cesizen-db-prod pg_isready -U cesizen -d cesizen_prod
+
+            echo ""
+            echo "✅ PROD démarrée avec succès"
+          EOF
