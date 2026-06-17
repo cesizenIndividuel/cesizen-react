@@ -25,6 +25,9 @@ jobs:
       - name: Installation dépendances
         run: npm ci
 
+      - name: Installation navigateur Playwright
+        run: npx playwright install --with-deps chromium
+
       - name: Vérification ESLint
         run: npm run lint
 
