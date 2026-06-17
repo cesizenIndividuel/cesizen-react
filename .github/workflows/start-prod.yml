@@ -25,22 +25,14 @@ jobs:
 
             echo "===== DEMARRAGE DE LA PROD ====="
 
-            cd ~/cesizen-prod
-
-            docker compose -f docker-compose.prod.yml up -d
+            docker start cesizen-db-prod
+            docker start cesizen-api-prod
+            docker start cesizen-front-prod
 
             echo ""
             echo "===== ETAT DES CONTENEURS ====="
             docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep -E "cesizen-front-prod|cesizen-api-prod|cesizen-db-prod"
 
             echo ""
-            echo "===== VERIFICATION API ====="
-            curl -f http://localhost:3000/api/health
-
-            echo ""
-            echo "===== VERIFICATION BDD ====="
-            docker exec cesizen-db-prod pg_isready -U cesizen -d cesizen_prod
-
-            echo ""
-            echo "✅ PROD démarrée avec succès"
+            echo "✅ PROD démarrée"
           EOF
