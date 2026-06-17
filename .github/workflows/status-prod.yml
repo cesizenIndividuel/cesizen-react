@@ -1,4 +1,4 @@
-name: status-prod
+name: Status PROD
 
 on:
   workflow_dispatch:
