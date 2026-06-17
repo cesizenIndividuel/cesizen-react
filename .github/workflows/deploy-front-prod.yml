@@ -1,14 +1,16 @@
 name: Deploy Prod Front
 
 on:
-  push:
-    tags:
-      - 'v*'
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
 
 jobs:
   deploy-prod-front:
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.merged == true
     steps:
       - name: Configurer SSH
         env:
@@ -20,17 +22,12 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
 
-      - name: Déployer le FRONT PROD
+      - name: Déployer le Front PROD
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/cesizen-prod
 
-            VERSION=${{ github.ref_name }}
-            echo "Déploiement FRONT PROD version $VERSION"
-
-            docker tag cesizen-front:latest cesizen-front:$VERSION
-
-            VERSION=$VERSION docker compose -f docker-compose.prod.yml stop front || true
-            VERSION=$VERSION docker compose -f docker-compose.prod.yml rm -f front || true
-            VERSION=$VERSION docker compose -f docker-compose.prod.yml up -d --no-deps front
+            docker compose -f docker-compose.prod.yml stop front || true
+            docker compose -f docker-compose.prod.yml rm -f front || true
+            docker compose -f docker-compose.prod.yml up -d --no-deps front
           EOF
