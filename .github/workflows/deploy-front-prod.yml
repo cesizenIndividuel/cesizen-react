@@ -24,11 +24,15 @@ jobs:
           ssh-keyscan -T 30 -H "$SSH_HOST" >> ~/.ssh/known_hosts || true
 
       - name: Déployer le FRONT PROD
+        env:
+          VERSION: ${{ github.event.release.tag_name || github.ref_name }}
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/cesizen-prod
 
-            VERSION=${{ github.ref_name }}
+            git fetch origin
+            git reset --hard origin/main
+
             echo "Déploiement FRONT PROD version $VERSION"
 
             docker tag cesizen-front:latest cesizen-front:$VERSION
