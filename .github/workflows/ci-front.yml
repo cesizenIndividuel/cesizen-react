@@ -30,3 +30,6 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Tests End-to-End Playwright
+        run: npm run test:e2e
