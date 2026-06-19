@@ -8,6 +8,7 @@ import { UserDetailsPage } from "../pages/UserDetailsPage";
 import { ArticlesPage } from "../pages/ArticlesPage";
 import { CategoriesPage } from "../pages/CategoriesPage";
 import { ArticleFormPage } from "../pages/ArticleFormPage";
+import { DiagnosticsPage } from "../pages/DiagnosticsPage";
 
 export const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ export const router = createBrowserRouter([
           {
             path: "categories",
             element: <CategoriesPage />,
+          },
+                    {
+            path: "diagnostics",
+            element: <DiagnosticsPage />,
           },
         ],
       },
